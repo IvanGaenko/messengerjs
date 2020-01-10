@@ -1,15 +1,19 @@
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import logger from 'morgan';
+import passport from 'passport';
 import routes from '../api';
+import config from '../config';
 
 export default app => {
+  require('../config');
   app.use(helmet());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(logger('dev'));
+  app.use(passport.initialize());
 
-  app.use('/', routes);
+  app.use(config.api.prefix, routes());
 
   app.get('*', (req, res) =>
     res.status(200).send({
