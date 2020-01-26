@@ -20,7 +20,8 @@ class UserController {
   }
 
   static async addUser(req, res) {
-    if (!req.body.name || !req.body.age || !req.body.email) {
+    const { name, age, email } = req.body;
+    if (!name || !age || !email) {
       util.setError(400, 'Please provide complete details');
       return util.send(res);
     }

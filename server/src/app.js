@@ -1,19 +1,23 @@
+// Imports
 import express from 'express';
-import loader from './loaders/express';
-import config from './config';
 
-async function startServer() {
-  const app = express();
+// App Imports
+import database from './loaders/database';
+import middlewares from './loaders/middlewares';
+import endpoint from './loaders/endpoint';
+import start from './loaders/start';
 
-  loader(app);
+// Create express server
+const app = express();
 
-  app.listen(config.port, err => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log(`Server running at ${config.port}`);
-  });
-}
+// Database
+database();
 
-startServer();
+// Setup middlewares
+middlewares(app);
+
+// Setup endpoint
+endpoint(app);
+
+// Start server
+start(app);

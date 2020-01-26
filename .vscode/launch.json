@@ -8,10 +8,8 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}\\server\\src\\loaders\\index.js"
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\server\\src\\services\\AuthService.js"
     }
   ]
 }
