@@ -52,7 +52,44 @@ class MessageService {
     }
   }
 
-  static async editMessage() {}
+  static async editMessage(messageId, author, message) {
+    try {
+      const messageToEdit = await database.Messages.findOne({
+        where: { id: Number(messageId) },
+      });
+      if (messageToEdit && messageToEdit.author === author) {
+        await database.Messages.update(
+          { message },
+          {
+            where: {
+              id: Number(messageId),
+            },
+          },
+        );
+        return { messageId, author, message };
+      }
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async deleteMessage(messageId, author) {
+    try {
+      const messageToDelete = await database.Messages.findOne({
+        where: { id: Number(messageId) },
+      });
+      if (messageToDelete && messageToDelete.author === author) {
+        await database.Messages.destroy({
+          where: { id: Number(messageId) },
+        });
+        return { messageId, author };
+      }
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default MessageService;

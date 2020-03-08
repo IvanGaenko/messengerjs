@@ -2,6 +2,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+// App Imports
+import EditMessage from './EditMessage';
+
 // Component
 const ChatRoomList = () => {
   //State
@@ -15,7 +18,7 @@ const ChatRoomList = () => {
             <span>
               {t.author}: {t.message}
             </span>
-            {/* <p>{t.createdAt}</p> */}
+            <EditMessage id={t.id} author={t.author} />
           </div>
         );
       })}

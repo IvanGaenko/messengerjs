@@ -30,7 +30,6 @@ function ChatRoom() {
   const connectToRoom = async () => {
     await getCurrentRoom();
     await getMessage();
-    // clearRaw();
   };
 
   // get Current Room
@@ -40,10 +39,6 @@ function ChatRoom() {
     if (messages.length !== 0) {
       dispatch(clearChatMessages());
     }
-
-    // if (rawMessages.length !== 0) {
-    //   dispatch(clearRawMessages(details.id, id));
-    // }
 
     dispatch(getRoom(details.id, id, rooms));
     setInitialized(true);
@@ -70,7 +65,6 @@ function ChatRoom() {
   useEffect(() => {
     if (!initialized) {
       connectToRoom();
-      // clearRaw();
     }
 
     if (!clear) {

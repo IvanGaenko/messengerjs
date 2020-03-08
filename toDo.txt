@@ -3,3 +3,5 @@ toDo:
 2. add friend requests;
 3. total unreaded messages;
 4. material ui;
+5. loading component;
+6. scrolling load messages;

@@ -88,3 +88,66 @@ export async function createMessage(data) {
 
   return chatMessage;
 }
+
+export async function editChatMessage({
+  auth,
+  params: { messageId, author, message },
+}) {
+  if (authCheck(auth)) {
+    try {
+      const editChatRoom = await MessageService.editMessage(
+        messageId,
+        author,
+        message,
+      ); //Messages
+
+      if (!editChatRoom) {
+        return {
+          success: false,
+          message: 'There is no message to edit.',
+        };
+      }
+
+      return {
+        success: true,
+        data: editChatRoom,
+        message: 'Success edit message.',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  console.log('no authorized');
+  throw new Error('You are not authorized to perform this action.');
+}
+
+export async function deleteChatMessage({
+  auth,
+  params: { messageId, author },
+}) {
+  if (authCheck(auth)) {
+    try {
+      const deleteChatRoom = await MessageService.deleteMessage(
+        messageId,
+        author,
+      ); //Messages
+
+      if (!deleteChatRoom) {
+        return {
+          success: false,
+          message: 'There is no message to delete.',
+        };
+      }
+
+      return {
+        success: true,
+        data: deleteChatRoom,
+        message: 'Success delete message.',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  console.log('no authorized');
+  throw new Error('You are not authorized to perform this action.');
+}

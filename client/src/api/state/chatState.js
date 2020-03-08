@@ -10,6 +10,8 @@ import {
   CLEAR_UNREAD,
   SET_UNREAD,
   GET_NEW_MESSAGES,
+  EDIT_MESSAGE,
+  DELETE_MESSAGE,
 } from '../types/chatTypes';
 
 // Initial State
@@ -93,6 +95,25 @@ export default (state = chatInitialState, action) => {
       return {
         ...state,
         room: newRoom,
+      };
+
+    case EDIT_MESSAGE:
+      return {
+        ...state,
+        messages: state.messages.map(m => {
+          if (m.id === action.editedMessage.messageId) {
+            return { ...m, message: action.editedMessage.message };
+          }
+          return m;
+        }),
+      };
+
+    case DELETE_MESSAGE:
+      return {
+        ...state,
+        messages: state.messages.filter(
+          m => m.id !== action.deletedMessage.messageId,
+        ),
       };
 
     default:
