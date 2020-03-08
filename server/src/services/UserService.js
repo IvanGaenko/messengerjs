@@ -1,4 +1,6 @@
-import database from '../models';
+// App Imports
+import database, { Sequelize } from '../models';
+const Op = Sequelize.Op;
 
 class UserService {
   static async getAllUsers() {
@@ -60,6 +62,71 @@ class UserService {
         return deletedUser;
       }
       return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getChatRooms(friendList) {
+    try {
+      console.log('getChatRooms');
+      return await database.Users.findAll({
+        where: {
+          id: {
+            [Op.in]: friendList,
+          },
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Users
+  static async getChatRooms(friendList) {
+    try {
+      console.log('getChatRooms');
+      return await database.Users.findAll({
+        where: {
+          id: {
+            [Op.in]: friendList,
+          },
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Users
+  static async addFriend(userId, newFriendList) {
+    try {
+      console.log('addFriend', userId, newFriendList);
+      return await database.Users.update(
+        {
+          friendList: newFriendList,
+        },
+
+        {
+          where: {
+            id: userId,
+          },
+        },
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Users
+  static async getChatRoom(id) {
+    try {
+      console.log('getChatRoom');
+      const chatRoomName = await database.Users.findOne({
+        where: { id: id },
+      });
+
+      return chatRoomName;
     } catch (error) {
       throw error;
     }

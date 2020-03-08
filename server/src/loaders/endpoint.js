@@ -1,6 +1,7 @@
 // App Imports
 import { node_env, endpoint } from '../config/env';
 import authentication from './authentication';
+import language from './language';
 import controllers from '../controllers';
 
 // Setup endpoint
@@ -8,13 +9,14 @@ export default function(app) {
   console.info('SETUP - Endpoint..');
 
   // API endpoint
-  app.all(endpoint.url, [authentication], async (req, res) => {
+  app.all(endpoint.url, [authentication, language], async (req, res) => {
     let result = {
       success: false,
       message: 'Please try again.',
       data: null,
     };
 
+    // console.log('yo', req.auth);
     // Check if operation to be called is set
     if (req.body.operation) {
       try {
@@ -33,7 +35,10 @@ export default function(app) {
         result.data = data;
         result.message = message;
       } catch (error) {
-        throw error;
+        result.message =
+          controllers[req.body.operation] === undefined
+            ? `${req.body.operation} operation is not available.`
+            : error.message;
       }
     }
 

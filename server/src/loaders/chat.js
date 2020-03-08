@@ -2,78 +2,45 @@
 import socket from 'socket.io';
 
 // App Imports
-import ChatService from '../services/ChatService';
+import { createMessage } from '../controllers/MessageController';
 
 // Setup chat
 export default server => {
   // Setup server
-  // const server = http.createServer(app);
-  // const io = require('socket.io')(server);
-  const io = socket(server);
+  const io = socket.listen(server);
 
   // Setup chat connection
   io.on('connection', socket => {
-    // Socket join room
-    // socket.on('join', async room => {
-    //   socket.join(room);
-    //   io.emit('roomJoined', room);
-    // });
+    console.log('Chat connected. Socket', socket.id);
 
-    // // Socket message
-    // socket.on('message', async data => {
-    //   const { chatRoomName, author, message } = data;
+    // Join or Create ChatRoom
+    socket.on('join', async joined => {
+      try {
+        socket.join(joined);
+        console.log('You join to the channel', joined);
+      } catch (error) {
+        throw error;
+      }
+    });
 
-    //   const chatRoom = await ChatService.getChatRoom(chatRoomName);
-    //   const chatRoomId = chatRoom[0].id;
+    // Receive messages
+    socket.on('message', async data => {
+      console.log('message', data);
+      const chatMessage = await createMessage(data);
+      io.sockets.in(data.roomName).emit('newMessage', chatMessage);
+      io.sockets.emit('unread', chatMessage);
+    });
 
-    //   const chatMessage = await ChatService.createChatRoom({
-    //     chatRoomId,
-    //     author,
-    //     message: message,
-    //   });
-    //   io.emit('newMessage', chatMessage);
-    // });
-    console.log('Chat connected');
+    socket.on('typing', data => {
+      io.sockets.in(data.roomName).emit('typing', data);
+    });
+
+    socket.on('stop typing', data => {
+      io.sockets.in(data.roomName).emit('stop typing', data);
+    });
 
     socket.on('disconnect', () => {
-      console.log('Chat disconnected');
+      console.log('Chat disconnected', socket.id);
     });
   });
-
-  //   router.get('/chatrooms', async (req, res, next) => {
-  //     const chatRooms = await models.ChatRoom.findAll();
-  //     res.send(chatRooms);
-  //   });
-
-  //   router.post('/chatroom', async (req, res, next) => {
-  //     const room = req.body.room;
-  //     const chatRooms = await models.ChatRoom.findAll({
-  //       where: { name: room },
-  //     });
-  //     const chatRoom = chatRooms[0];
-  //     if (!chatRoom) {
-  //       await models.ChatRoom.create({ name: room });
-  //     }
-  //     res.send(chatRooms);
-  //   });
-
-  //   router.get('/chatroom/messages/:chatRoomName', async (req, res, next) => {
-  //     try {
-  //       const chatRoomName = req.params.chatRoomName;
-  //       const chatRooms = await models.ChatRoom.findAll({
-  //         where: {
-  //           name: chatRoomName,
-  //         },
-  //       });
-  //       const chatRoomId = chatRooms[0].id;
-  //       const messages = await models.ChatMessage.findAll({
-  //         where: {
-  //           chatRoomId,
-  //         },
-  //       });
-  //       res.send(messages);
-  //     } catch (error) {
-  //       res.send([]);
-  //     }
-  //   });
 };

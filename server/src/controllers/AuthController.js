@@ -15,6 +15,7 @@ export async function loginUser({ params: { email, password } }) {
           message: 'The email you entered is invalid.',
         };
       }
+
       const validPassword = bcrypt.compareSync(password, loggedUser.password);
       if (!validPassword) {
         return {
@@ -22,6 +23,10 @@ export async function loginUser({ params: { email, password } }) {
           message: 'The password you entered is invalid.',
         };
       }
+
+      loggedUser.friendList = loggedUser.friendList.map(m => {
+        return JSON.parse(m);
+      });
 
       return {
         success: true,
@@ -34,13 +39,19 @@ export async function loginUser({ params: { email, password } }) {
   }
 }
 
-export function userAuthResponse({ id, name, email }) {
+// export function userAuthResponse({ id, name, email, friendList }) {
+export function userAuthResponse(loggedUser) {
+  const { id, name, email, friendList } = loggedUser;
+
   return {
-    token: jwt.sign({ id: id }, jwtSecret),
-    user: { name, email },
+    token: jwt.sign({ id: id }, jwtSecret, {
+      //  expiresIn: 300
+    }),
+    user: { id, name, email, friendList },
   };
 }
 
+// Register
 export async function registerUser({
   params: { name, password, email, passwordRepeat },
 }) {

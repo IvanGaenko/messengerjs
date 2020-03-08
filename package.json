@@ -1,0 +1,22 @@
+{
+  "name": "messengerjs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "cd server && npm run start",
+    "client": "cd client && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IvanGaenko/messengerjs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IvanGaenko/messengerjs/issues"
+  },
+  "homepage": "https://github.com/IvanGaenko/messengerjs#readme"
+}

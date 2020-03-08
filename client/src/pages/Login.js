@@ -31,7 +31,7 @@ function Login(props) {
   const onChange = event => {
     setUser({
       ...user,
-      [event.target.name]: event.target.value,
+      [event.target.name]: event.target.value.trim(),
     });
   };
 
@@ -41,7 +41,7 @@ function Login(props) {
   }
 
   return (
-    <div>
+    <div style={{ textAlign: 'center', margin: '30vh auto', width: '70%' }}>
       <Link to={routes.admin.path}>Admin</Link>
       <Link to={routes.userProfile.path}>Profile</Link>
       <p>Already have an account? Please login:</p>
@@ -72,6 +72,11 @@ function Login(props) {
         <input type="submit" disabled={isLoading} />
       </form>
       {error}
+      <div>
+        <Link to={routes.userSignup.path}>
+          Not have an account? Please sign up.
+        </Link>
+      </div>
 
       {/* Auth Check */}
       <AuthCheck />

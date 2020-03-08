@@ -1,108 +1,143 @@
+// App Imports
+import { authCheck } from '../helpers/utils';
 import UserService from '../services/UserService';
-import Util from '../utils/Util';
+import { getConnectionData } from './RoomController';
+import { getOldMessage } from './MessageController';
 
-const util = new Util();
+// Get All ChatRooms - Users
+export async function getAllChatRooms({
+  auth,
+  params: { detail, friendList },
+}) {
+  if (authCheck(auth)) {
+    if (!detail || !Number.isInteger(detail)) {
+      return {
+        success: false,
+        message: 'There is wrong detail.id',
+      };
+    }
 
-class UserController {
-  static async getAllUsers(req, res) {
     try {
-      const allUsers = await UserService.getAllUsers();
-      if (allUsers.length > 0) {
-        util.setSuccess(200, 'Users retrieved', allUsers);
-      } else {
-        util.setSuccess(200, 'No book found');
+      // Get Chat Rooms
+      const getAllRooms = await UserService.getChatRooms(friendList); //Users
+
+      if (!getAllRooms) {
+        return {
+          success: false,
+          message: 'There is no chatrooms. Maybe you should create one?',
+        };
       }
-      return util.send(res);
-    } catch (error) {
-      util.setError(400, error);
-      return util.send(res);
-    }
-  }
 
-  static async addUser(req, res) {
-    const { name, age, email } = req.body;
-    if (!name || !age || !email) {
-      util.setError(400, 'Please provide complete details');
-      return util.send(res);
-    }
-    const newUser = req.body;
-    try {
-      const createdUser = await UserService.addUser(newUser);
-      util.setSuccess(201, 'User added!', createdUser);
-      return util.send(res);
-    } catch (error) {
-      util.setError(400, error.message);
-      return util.send(res);
-    }
-  }
+      const chatList = getAllRooms.map(rooms => {
+        return {
+          name: rooms.name,
+          id: rooms.id,
+          email: rooms.email,
+          friendList: rooms.friendList,
+        };
+      });
 
-  static async updatedUser(req, res) {
-    const alteredUser = req.body;
-    const { id } = req.params;
-    if (!Number(id)) {
-      util.setError(400, 'Please input a valid numeric value');
-      return util.send(res);
-    }
-    try {
-      const updateUser = await UserService.updatedUser(id, alteredUser);
-      if (!updateUser) {
-        util.setError(404, `Cannon find user with the id: ${id}`);
-      } else {
-        util.setSuccess(200, 'Book updated', updateUser);
+      for (const item of chatList) {
+        const connectionData = await getConnectionData(detail, item.id); //Room
+        const getMessageData = await getOldMessage(connectionData[0].id); // Messages
+        item.chatId = connectionData[0].name;
+        item.messageId = connectionData[0].id;
+        item.rawMessages = getMessageData.filter(item => item.isRead !== true);
+        item.oldMessages = getMessageData;
       }
-      return util.send(res);
+
+      return {
+        success: true,
+        data: chatList,
+        message: 'Here is your chatrooms list',
+      };
     } catch (error) {
-      util.setError(404, error);
-      return util.send(res);
+      throw error;
     }
   }
-
-  static async getAUser(req, res) {
-    const { id } = req.params;
-
-    if (!Number(id)) {
-      util.setError(400, 'Please input a valid numeric value');
-      return util.send(res);
-    }
-    try {
-      const theUser = await UserService.getUser(id);
-
-      if (!theUser) {
-        util.setError(404, `Cannot find user with the id ${id}`);
-      } else {
-        util.setSuccess(200, 'Found User', theUser);
-      }
-      return util.send(res);
-    } catch (error) {
-      util.setError(404, error);
-      return util.send(res);
-    }
-  }
-
-  static async deleteUser(req, res) {
-    const { id } = req.params;
-
-    if (!Number(id)) {
-      util.setError(400, 'Please provide a numeric value');
-      return util.send(res);
-    }
-
-    try {
-      const userToDelete = await UserService.deleteUser(id);
-      if (userToDelete) {
-        console.log('success');
-        util.setSuccess(200, 'User deleted');
-      } else {
-        console.log('error');
-        util.setError(404, `User with the id ${id} cannot be found`);
-      }
-      return util.send(res);
-    } catch (error) {
-      console.log('err');
-      util.setError(400, error);
-      return util.send(res);
-    }
-  }
+  console.log('no authorized');
+  throw new Error('You are not authorized to perform this action.');
 }
 
-export default UserController;
+// Get Room
+export async function getRoom({ auth, params: { detail, id } }) {
+  if (authCheck(auth)) {
+    try {
+      const getCurrentRoom = await UserService.getChatRoom(id); //Users
+      const connectionData = await getConnectionData(detail, id); // Room
+
+      if (!getCurrentRoom) {
+        return {
+          success: false,
+          message: 'There is no chatroom. Maybe you should create one?',
+        };
+      }
+
+      const currentRoom = [getCurrentRoom].map(c => {
+        return {
+          id: c.id,
+          email: c.email,
+          name: c.name,
+          getChatId: connectionData[0].name,
+          messageId: connectionData[0].id,
+        };
+      });
+
+      for (const item of currentRoom) {
+        const getMessageData = await getOldMessage(connectionData[0].id); //Messages
+        item.rawMessages = getMessageData.filter(item => item.isRead !== true);
+      }
+
+      return {
+        success: true,
+        data: currentRoom,
+        message: 'Here is your chatroom',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  console.log('no authorized');
+  throw new Error('You are not authorized to perform this action.');
+}
+
+// Add Friend
+export async function addFriend({
+  params: { userId, searchId, newFriendList },
+}) {
+  if (!searchId || !newFriendList) {
+    return {
+      success: false,
+      message: 'There is wrong user id',
+    };
+  }
+
+  const checkUserId = await UserService.getUser(parseInt(searchId));
+  console.log('checkUserId', checkUserId);
+  if (!checkUserId) {
+    return {
+      success: false,
+      message: 'There is no user',
+    };
+  }
+
+  try {
+    const getAllFriends = await UserService.addFriend(userId, newFriendList);
+    console.log('getAllFriends', getAllFriends);
+
+    if (!getAllFriends) {
+      return {
+        success: false,
+        message: 'There is no friends list.',
+      };
+    }
+
+    return {
+      success: true,
+      data: getAllFriends,
+      message: 'Here is your friends list',
+    };
+  } catch (error) {
+    throw error;
+  }
+}

@@ -7,6 +7,7 @@ import {
   LOGIN_REQUEST,
   LOGIN_RESPONSE,
   LOGOUT,
+  ADD_FRIEND,
 } from '../types/authTypes';
 
 // Initial State
@@ -45,6 +46,14 @@ export default (state = authInitialState, action) => {
 
     case LOGOUT:
       return authInitialState;
+
+    case ADD_FRIEND:
+      const getNewDetails = state.details;
+      getNewDetails.friendList = action.friendList;
+      return {
+        ...state,
+        details: getNewDetails,
+      };
 
     default:
       return state;

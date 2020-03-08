@@ -6,10 +6,11 @@ import { Link, withRouter } from 'react-router-dom';
 // App Imports
 import routes from '../setup/routes';
 import { logout } from '../api/actions/auth';
+// import UnreadMessageCount from './../pages/UnreadMessageCount';
 
 const Header = () => {
   // state
-  const { isAuthenticated } = useSelector(state => state.auth);
+  const { isAuthenticated, details } = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
   // on click logout
@@ -25,7 +26,11 @@ const Header = () => {
     <div>
       <div>
         {isAuthenticated ? (
-          <button onClick={onClickLogout}>Log out</button>
+          <div>
+            <button onClick={onClickLogout}>Log out</button>
+            {details.name}
+            <Link to={routes.userProfile.path}>Profile</Link>
+          </div>
         ) : (
           <button component={Link} to={routes.userLogin.path}>
             Login

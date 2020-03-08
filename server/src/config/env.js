@@ -43,3 +43,8 @@ export const web_url = process.env.WEB_URL;
 
 // CORS whitelist
 export const CORS_whitelist = [api_url, web_url];
+
+// Default language
+export const language = {
+  default: 'en-Us',
+};

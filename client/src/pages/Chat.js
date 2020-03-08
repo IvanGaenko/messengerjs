@@ -1,54 +1,49 @@
 // Imports
-import React, { useEffect } from 'react';
-import io from 'socket.io-client';
-// import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 // App Imports
-import { API_URL } from '../setup/config/env';
+import { getChatRooms } from '../api/actions/chat';
+import { io } from '../setup/socket';
+import FriendMessagePanel from './FriendMessagePanel';
 
 // Component
 const Chat = () => {
   // state
-  // const { details } = useSelector(state => state.auth);
+  const [initialized, setInitialized] = useState(false);
+  const { rooms } = useSelector(state => state.chat);
+  const { details } = useSelector(state => state.auth);
 
-  const socket = io(API_URL);
+  const dispatch = useDispatch();
 
-  const connectToRoom = () => {
-    socket.on('connection', data => {
-      console.log('client connected');
-      data.on('disconnect', () => {
-        console.log('client disconnected');
-      });
-    });
+  // get Rooms
+  const getRooms = async () => {
+    console.log('getRooms');
+    dispatch(getChatRooms(details.id, details.friendList));
+    setInitialized(true);
   };
 
   useEffect(() => {
-    connectToRoom();
+    if (!initialized) {
+      getRooms();
+    }
+
+    io.on('unread', async () => {
+      console.log('hey! new messages!');
+      await getRooms();
+    });
+    return () => {
+      io.off('unread');
+    };
   });
 
   return (
-    <div>
+    <div style={{ textAlign: 'center', margin: '30vh auto', width: '70%' }}>
       <p>Chat</p>
 
       <div>
         <p>Sunt consiliumes convertam nobilis, neuter cobaltumes.</p>
-
-        <form>
-          {/* Input - message */}
-          <input
-            type="text"
-            name="message"
-            // value={user.email}
-            // onChange={onChange}
-            label="Message"
-            placeholder="Type message"
-            required={true}
-            autoFocus
-          />
-
-          {/* Button - send */}
-          <input type="submit" />
-        </form>
+        <FriendMessagePanel rooms={rooms} />
       </div>
     </div>
   );

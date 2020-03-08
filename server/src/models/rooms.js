@@ -1,20 +1,22 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const Users = sequelize.define(
-    'Users',
+  const Rooms = sequelize.define(
+    'Rooms',
     {
-      email: DataTypes.STRING,
-      password: DataTypes.STRING,
       name: DataTypes.STRING,
-      friendList: {
+      raw_message: {
         type: DataTypes.ARRAY(DataTypes.TEXT),
         defaultValue: [],
       },
     },
     {},
   );
-  Users.associate = function(models) {
+  Rooms.associate = function(models) {
     // associations can be defined here
+    Rooms.hasMany(models.Messages, {
+      foreignKey: 'chatRoomId',
+      sourceKey: 'id',
+    });
   };
-  return Users;
+  return Rooms;
 };
