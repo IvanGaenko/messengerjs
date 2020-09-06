@@ -3,10 +3,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider as StateProvider } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 //App Imports
 import { store } from './setup/store';
 import routes from './setup/routes';
+import theme from './setup/theme';
 import Layout from './modules/Layout';
 import Redirector from './modules/Redirector';
 import RoutePrivate from './modules/auth/RoutePrivate';
@@ -28,19 +31,22 @@ if (token && token !== 'undefined' && token !== '') {
 ReactDOM.render(
   <StateProvider store={store}>
     <Router>
-      <Layout>
-        <Switch>
-          {Object.values(routes).map((route, index) =>
-            route.auth ? (
-              <RoutePrivate {...route} key={index} path={route.path} />
-            ) : (
-              <Route {...route} key={index} path={route.path} />
-            ),
-          )}
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <Layout>
+          <Switch>
+            {Object.values(routes).map((route, index) =>
+              route.auth ? (
+                <RoutePrivate {...route} key={index} path={route.path} />
+              ) : (
+                <Route {...route} key={index} path={route.path} />
+              ),
+            )}
 
-          <Route component={Redirector} />
-        </Switch>
-      </Layout>
+            <Route component={Redirector} />
+          </Switch>
+        </Layout>
+      </MuiThemeProvider>
     </Router>
   </StateProvider>,
   document.getElementById('root'),

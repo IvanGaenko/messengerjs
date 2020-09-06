@@ -7,8 +7,10 @@ import { getOldMessage } from './MessageController';
 // Get All ChatRooms - Users
 export async function getAllChatRooms({
   auth,
-  params: { detail, friendList },
+  params: { detail, friendList, limit },
 }) {
+  console.log('LIST LIMIT', limit);
+
   if (authCheck(auth)) {
     if (!detail || !Number.isInteger(detail)) {
       return {
@@ -39,7 +41,7 @@ export async function getAllChatRooms({
 
       for (const item of chatList) {
         const connectionData = await getConnectionData(detail, item.id); //Room
-        const getMessageData = await getOldMessage(connectionData[0].id); // Messages
+        const getMessageData = await getOldMessage(connectionData[0].id, limit); // Messages
         item.chatId = connectionData[0].name;
         item.messageId = connectionData[0].id;
         item.rawMessages = getMessageData.filter(item => item.isRead !== true);
@@ -60,7 +62,8 @@ export async function getAllChatRooms({
 }
 
 // Get Room
-export async function getRoom({ auth, params: { detail, id } }) {
+export async function getRoom({ auth, params: { detail, id, limit } }) {
+  console.log('ROOM LIMIT', limit);
   if (authCheck(auth)) {
     try {
       const getCurrentRoom = await UserService.getChatRoom(id); //Users
@@ -78,13 +81,13 @@ export async function getRoom({ auth, params: { detail, id } }) {
           id: c.id,
           email: c.email,
           name: c.name,
-          getChatId: connectionData[0].name,
+          chatId: connectionData[0].name,
           messageId: connectionData[0].id,
         };
       });
 
       for (const item of currentRoom) {
-        const getMessageData = await getOldMessage(connectionData[0].id); //Messages
+        const getMessageData = await getOldMessage(connectionData[0].id, limit); //Messages
         item.rawMessages = getMessageData.filter(item => item.isRead !== true);
       }
 

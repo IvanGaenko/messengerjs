@@ -1,21 +1,18 @@
-require('dotenv').config();
-
-const db_username = process.env.DB_USERNAME;
-const db_password = process.env.DB_PASSWORD;
-const db_name = process.env.DB_NAME;
+// Imports
+import { DB_USERNAME, DB_PASSWORD, DB_NAME } from '../config';
 
 module.exports = {
   development: {
-    username: db_username,
-    password: db_password,
-    database: db_name,
+    username: DB_USERNAME,
+    password: DB_PASSWORD,
+    database: DB_NAME,
     host: '127.0.0.1',
     dialect: 'postgres',
   },
   production: {
-    username: db_username,
-    password: db_password,
-    database: db_name,
+    username: DB_USERNAME,
+    password: DB_PASSWORD,
+    database: DB_NAME,
     host: '127.0.0.1',
     dialect: 'postgres',
   },

@@ -31,11 +31,18 @@ export default server => {
       io.sockets.emit('unread', chatMessage);
     });
 
-    socket.on('typing', data => {
+    socket.on('checkMessage', async data => {
+      console.log('checkMessage', data);
+      io.sockets.in(data.roomName).emit('updateMessage', data);
+    });
+
+    socket.on('typing', async data => {
+      console.log('data', data);
       io.sockets.in(data.roomName).emit('typing', data);
     });
 
-    socket.on('stop typing', data => {
+    socket.on('stop typing', async data => {
+      console.log('data', data);
       io.sockets.in(data.roomName).emit('stop typing', data);
     });
 

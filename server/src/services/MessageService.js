@@ -12,12 +12,13 @@ class MessageService {
     }
   }
 
-  static async getChatMessages(id) {
-    console.log('getChatMessages', id);
+  static async getChatMessages(id, limit) {
+    console.log('getChatMessages', id, limit);
     try {
       const chatMessages = await database.Messages.findAll({
         where: { chatRoomId: id },
-        limit: 5,
+        // limit: 5,
+        limit,
         order: [['id', 'DESC']],
       });
 
@@ -27,7 +28,9 @@ class MessageService {
     }
   }
 
-  static async updateChatMessage(name) {
+  static async updateChatMessage(name, messageId) {
+    console.log('messageId', messageId);
+
     try {
       await database.Messages.update(
         {
@@ -38,6 +41,7 @@ class MessageService {
             author: {
               [Op.ne]: name,
             },
+            chatRoomId: messageId,
           },
         },
       );

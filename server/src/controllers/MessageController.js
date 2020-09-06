@@ -3,11 +3,11 @@ import { authCheck } from '../helpers/utils';
 import MessageService from '../services/MessageService';
 import { getConnectionData } from './RoomController';
 
-export async function getOldMessage(chatId) {
+export async function getOldMessage(chatId, limit) {
   if (!chatId) {
     return [];
   }
-  const messages = await MessageService.getChatMessages(chatId); // Messages
+  const messages = await MessageService.getChatMessages(chatId, limit); // Messages
 
   if (!messages || messages.length === 0) {
     return [
@@ -23,12 +23,13 @@ export async function getOldMessage(chatId) {
 }
 
 // Get Message
-export async function getMessage({ auth, params: { detail, id } }) {
+export async function getMessage({ auth, params: { detail, id, limit } }) {
   if (authCheck(auth)) {
     try {
       const connectionData = await getConnectionData(detail, id);
       const messages = await MessageService.getChatMessages(
         connectionData[0].id,
+        limit,
       ); //Messages
 
       if (!messages) {
@@ -51,10 +52,14 @@ export async function getMessage({ auth, params: { detail, id } }) {
   throw new Error('You are not authorized to perform this action.');
 }
 
-export async function clearRawMessages({ auth, params: { name } }) {
+export async function clearRawMessages({ auth, params: { detail, id, name } }) {
   if (authCheck(auth)) {
     try {
-      const updateRoom = await MessageService.updateChatMessage(name); //Messages
+      const connectionData = await getConnectionData(detail, id); // Room
+      const updateRoom = await MessageService.updateChatMessage(
+        name,
+        connectionData[0].id,
+      ); //Messages
 
       if (!updateRoom) {
         return {

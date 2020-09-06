@@ -27,8 +27,9 @@
     "treatUndefinedAsUnspecified": true,
     "arrow-body-style": 0,
     "comma-dangle": 0,
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
-  "plugins": ["babel", "prettier"],
-  "parser": "babel-eslint"
+  "plugins": ["babel", "prettier", "react-hooks"]
 }

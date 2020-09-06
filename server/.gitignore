@@ -12,3 +12,4 @@ yarn-error.log*
 .env
 build
 /src/config/config.json
+package-lock.json

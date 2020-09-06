@@ -1,3 +1,6 @@
+// Imports
+import chalk from 'chalk';
+
 // App Imports
 import { node_env, endpoint } from '../config/env';
 import authentication from './authentication';
@@ -45,7 +48,7 @@ export default function(app) {
     // Log info in development mode
     if (node_env === 'development') {
       console.log('req.body', req.body);
-      console.log('result.success', result.success);
+      console.log(chalk.underline.green('result.success', result.success));
       console.log('result.message', result.message);
     }
 

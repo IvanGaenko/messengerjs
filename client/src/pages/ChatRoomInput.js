@@ -19,10 +19,21 @@ const ChatRoomInput = () => {
   // On Change
   const onChange = event => {
     setMessage(event.target.value);
+
     sendStartTyping({
+      id: details.id,
       user: details.name,
       roomName: connectionData,
       typingStatus: true,
+    });
+  };
+
+  const sendStopTyping = () => {
+    return socketEmit('stop typing', {
+      id: details.id,
+      user: details.name,
+      roomName: connectionData,
+      typingStatus: false,
     });
   };
 
@@ -31,14 +42,6 @@ const ChatRoomInput = () => {
     let timeout;
     clearTimeout(timeout);
     timeout = setTimeout(sendStopTyping, 300);
-  };
-
-  const sendStopTyping = () => {
-    return socketEmit('stop typing', {
-      user: details.name,
-      roomName: connectionData,
-      typingStatus: false,
-    });
   };
 
   // Send Message
@@ -57,19 +60,23 @@ const ChatRoomInput = () => {
 
   useEffect(() => {
     io.on('typing', data => {
-      console.log('hey! its typing!', data.user);
-      if (data.user === details.name) {
+      if (data.id === details.id) {
         return;
       }
-      dispatch(startTyping(data));
+      if (room.chatId === data.roomName) {
+        console.log('hey! its typing!', data.user);
+        dispatch(startTyping(data));
+      }
     });
 
     io.on('stop typing', data => {
-      console.log('hey! its stop typing!', data.user);
-      if (data.user === details.name) {
+      if (data.id === details.id) {
         return;
       }
-      dispatch(stopTyping(data));
+      if (room.chatId === data.roomName) {
+        console.log('hey! its stop typing!', data.user);
+        dispatch(stopTyping(data));
+      }
     });
 
     return () => {

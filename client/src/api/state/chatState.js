@@ -4,7 +4,11 @@ import {
   GET_CHAT_LIST_REQUEST,
   GET_CHAT_LIST_RESPONSE,
   GET_ROOM,
+  GET_ROOM_REQUEST,
+  GET_ROOM_RESPONSE,
   GET_MESSAGES,
+  GET_MESSAGES_REQUEST,
+  GET_MESSAGES_RESPONSE,
   SET_CONNECTION,
   CLEAR_MESSAGES,
   CLEAR_UNREAD,
@@ -18,6 +22,8 @@ import {
 
 export const chatInitialState = {
   isLoading: false,
+  isRoomLoading: false,
+  isMessageLoading: false,
   error: null,
   rooms: [],
   room: [],
@@ -57,10 +63,38 @@ export default (state = chatInitialState, action) => {
         room: action.room,
       };
 
+    case GET_ROOM_REQUEST:
+      return {
+        ...state,
+        error: null,
+        isRoomLoading: action.isRoomLoading,
+      };
+
+    case GET_ROOM_RESPONSE:
+      return {
+        ...state,
+        error: action.error,
+        isRoomLoading: false,
+      };
+
     case GET_MESSAGES:
       return {
         ...state,
         messages: action.messages,
+      };
+
+    case GET_MESSAGES_REQUEST:
+      return {
+        ...state,
+        error: null,
+        isMessageLoading: action.isMessageLoading,
+      };
+
+    case GET_MESSAGES_RESPONSE:
+      return {
+        ...state,
+        error: action.error,
+        isMessageLoading: false,
       };
 
     case SET_CONNECTION:
@@ -98,8 +132,37 @@ export default (state = chatInitialState, action) => {
       };
 
     case EDIT_MESSAGE:
+      const newOldMessages = state.rooms.map(r => {
+        if (r.chatId === action.chatId) {
+          return {
+            ...r,
+            oldMessages: r.oldMessages.map(m => {
+              if (m.id === action.editedMessage.messageId) {
+                return { ...m, message: action.editedMessage.message };
+              }
+              return m;
+            }),
+          };
+        }
+        return r;
+      });
+
+      const newRoomOldMessages = state.room;
+      if (state.room.length !== 0 && state.room.oldMessages !== undefined) {
+        newRoomOldMessages.oldMessages = state.room.oldMessages.map(r => {
+          if (r.id === action.editedMessage.messageId) {
+            return { ...r, message: action.editedMessage.message };
+          }
+          return r;
+        });
+      } else {
+        newRoomOldMessages.oldMessages = [];
+      }
+
       return {
         ...state,
+        rooms: state.rooms.length === 0 ? state.rooms : newOldMessages,
+        room: newRoomOldMessages,
         messages: state.messages.map(m => {
           if (m.id === action.editedMessage.messageId) {
             return { ...m, message: action.editedMessage.message };
@@ -109,8 +172,30 @@ export default (state = chatInitialState, action) => {
       };
 
     case DELETE_MESSAGE:
+      const deleteOldMessages = state.rooms.map(r => {
+        if (r.chatId === action.chatId) {
+          return {
+            ...r,
+            oldMessages: r.oldMessages.filter(
+              m => m.id !== action.deletedMessage.messageId,
+            ),
+          };
+        }
+        return r;
+      });
+
+      const deleteRoomOldMessages = state.room;
+      if (state.room.length !== 0 && state.room.oldMessages !== undefined) {
+        deleteRoomOldMessages.oldMessages = state.room.oldMessages.filter(
+          m => m.id !== action.deletedMessage.messageId,
+        );
+      } else {
+        deleteRoomOldMessages.oldMessages = [];
+      }
       return {
         ...state,
+        rooms: state.rooms.length === 0 ? state.rooms : deleteOldMessages,
+        room: deleteRoomOldMessages,
         messages: state.messages.filter(
           m => m.id !== action.deletedMessage.messageId,
         ),

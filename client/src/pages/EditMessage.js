@@ -1,30 +1,40 @@
 // Imports
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 // App Imports
 import { editChatMessages, deleteChatMessage } from '../api/actions/messages';
+import { socketEmit } from '../setup/socket';
 
 // Component
 const EditMessage = props => {
-  const { id, author } = props;
+  const { id, author, message, connectionData } = props;
   //State
   const [editMode, setEditMode] = useState(false);
-  const [message, setMessage] = useState('');
+  const [editMessage, setEditMessage] = useState(message);
+  const { details } = useSelector(state => state.auth);
 
   const dispatch = useDispatch();
 
   // On Change
   const onChange = event => {
-    setMessage(event.target.value);
+    setEditMessage(event.target.value);
   };
 
   // Complete Edit
   const onSubmitEdit = event => {
     event.preventDefault();
-    dispatch(editChatMessages(id, author, message));
-    setMessage('');
+    dispatch(editChatMessages(id, author, editMessage, connectionData));
     setEditMode(false);
+
+    const data = {
+      messageId: id,
+      author,
+      message: editMessage,
+      roomName: connectionData,
+      status: 'update',
+    };
+    socketEmit('checkMessage', data);
   };
 
   // Start Edit Message
@@ -35,13 +45,21 @@ const EditMessage = props => {
   // Cancel Edit Message
   const cancelEdit = () => {
     setEditMode(false);
-    setMessage('');
   };
 
   // Delete Message
   const deleteMessage = () => {
-    dispatch(deleteChatMessage(id, author));
+    dispatch(deleteChatMessage(id, author, connectionData));
     setEditMode(false);
+
+    const data = {
+      messageId: id,
+      author,
+      message: editMessage,
+      roomName: connectionData,
+      status: 'delete',
+    };
+    socketEmit('checkMessage', data);
   };
 
   return (
@@ -53,7 +71,7 @@ const EditMessage = props => {
             <input
               type="text"
               name="message"
-              value={message}
+              value={editMessage}
               onChange={onChange}
               label="Message"
               placeholder="Edit message"
@@ -70,7 +88,12 @@ const EditMessage = props => {
           </div>
         </div>
       ) : (
-        <button onClick={startEdit}>Edit</button>
+        <span>
+          {message}
+          {details.name !== author ? null : (
+            <button onClick={startEdit}>Edit</button>
+          )}
+        </span>
       )}
     </span>
   );
