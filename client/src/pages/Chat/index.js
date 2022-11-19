@@ -10,7 +10,7 @@ import styles from './styles';
 
 // App Imports
 import { getChatRooms } from '../../api/actions/chat';
-import { io } from '../../setup/socket';
+import { socket as io } from '../../setup/socket';
 import FriendMessagePanel from '../FriendMessagePanel';
 import Section from '../../modules/Section';
 import Loading from '../Loading';

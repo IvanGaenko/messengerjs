@@ -1,5 +1,5 @@
 // Component Styles
-const styles = theme => ({
+const styles = () => ({
   grow: {
     flexGrow: 1,
   },

@@ -5,30 +5,26 @@
     "node": true,
     "commonjs": true
   },
-  "extends": ["airbnb-base", "plugin:prettier/recommended"],
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly"
-  },
+  "extends": ["eslint:recommended"],
   "parserOptions": {
-    "ecmaVersion": 2018,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "rules": {
     "no-console": 0,
-    "linebreak-style": 0,
-    "no-param-reassign": [
-      2,
+    "import/prefer-default-export": 0,
+    "no-unused-vars": ["error", { "argsIgnorePattern": "req|res|val|next" }],
+    "prefer-destructuring": [
+      "error",
       {
-        "props": false
+        "array": true,
+        "object": true
+      },
+      {
+        "enforceForRenamedProperties": false
       }
-    ],
-    "prefer-destructuring": 0,
-    "treatUndefinedAsUnspecified": true,
-    "arrow-body-style": 0,
-    "comma-dangle": 0,
-    "prettier/prettier": "error"
+    ]
+    // "prettier/prettier": "error"
   },
-  "plugins": ["babel", "prettier"],
-  "parser": "babel-eslint"
+  "plugins": ["prettier"]
 }

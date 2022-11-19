@@ -1,9 +1,10 @@
 import database from '../models';
+const { User } = database.sequelize.models;
 
 class AuthService {
   static async registerUser(newUser) {
     try {
-      return await database.Users.create(newUser);
+      return await User.create(newUser);
     } catch (error) {
       throw error;
     }
@@ -11,7 +12,7 @@ class AuthService {
 
   static async loginUser(email) {
     try {
-      const theUser = await database.Users.findOne({
+      const theUser = await User.findOne({
         where: { email: email },
       });
       return theUser;
@@ -23,7 +24,7 @@ class AuthService {
   static async findUserId(id) {
     console.log('findUserId');
     try {
-      const findedUser = await database.Users.findOne({
+      const findedUser = await User.findOne({
         where: { id: id },
       });
       return findedUser;
@@ -33,11 +34,11 @@ class AuthService {
   }
 
   static async findUsername(email) {
-    console.log('findUsername');
     try {
-      const findedUsername = await database.Users.findOne({
+      const findedUsername = await User.findOne({
         where: { email: email },
       });
+      // console.log('findUsername', findedUsername);
       return findedUsername;
     } catch (error) {
       throw error;

@@ -1,39 +1,58 @@
 // Imports
-import bodyParser from 'body-parser';
 import helmet from 'helmet';
-import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import Cors from 'cors';
 
 // App Imports
-import { node_env, CORS_whitelist } from '../config/env';
+import { CORS_whitelist as CORSWhitelist } from '../config/env';
+import apiRouter from '../routes';
 
 // Setup middlewares
-export default app => {
+export default (app, express) => {
   console.info('SETUP - Middlewares..');
 
   // Enable helmet
   app.use(helmet());
 
   // Request body parser
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+
+  app.use(cookieParser());
 
   // HTTP logger
-  if (node_env === 'development') {
-    app.use(logger('dev'));
-  }
+  app.use(morgan('dev'));
 
   // Enable CORS
   const corsOptions = {
     origin: (origin, callback) => {
-      if (CORS_whitelist.indexOf(origin) !== -1) {
+      console.log('origin', origin);
+      if (!origin) return callback(null, true);
+      if (CORSWhitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
     },
     optionsSuccessStatus: 200,
+    credentials: true,
   };
 
   app.use(Cors(corsOptions));
+
+  app.get('/', async (req, res) => {
+    res.status(200).json({
+      status: 'success',
+      message: 'welcome to chat api',
+    });
+  });
+
+  app.use(apiRouter);
+  app.all('*', async (req, res) => {
+    res.status(404).json({
+      status: 'error',
+      message: `${req.originalUrl} does not exist on the server`,
+    });
+  });
 };

@@ -1,6 +1,6 @@
 // Imports
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 // App Imports
 import Header from './Header';
@@ -13,9 +13,19 @@ const Layout = ({ children }) => {
       {/* Header */}
       <Header />
       {/* Body */}
-      <main>{children}</main>
+
+      <main>
+        {children}
+        <footer style={{ display: 'flex', justifyContent: 'center' }}>
+          Footer
+        </footer>
+      </main>
     </div>
   );
 };
 
-export default withRouter(Layout);
+Layout.propTypes = {
+  children: PropTypes.shape().isRequired,
+};
+
+export default Layout;

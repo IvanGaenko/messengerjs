@@ -1,6 +1,7 @@
 // App Imports
 import database, { Sequelize } from '../models';
-const Op = Sequelize.Op;
+// const Op = Sequelize.Op;
+import { Op } from 'sequelize';
 
 class UserService {
   static async getAllUsers() {

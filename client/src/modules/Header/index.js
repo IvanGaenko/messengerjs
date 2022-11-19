@@ -2,7 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // UI Imports
 import AppBar from '@material-ui/core/AppBar';
@@ -16,9 +16,9 @@ import styles from './styles';
 import routes from '../../setup/routes';
 import { logout } from '../../api/actions/auth';
 
-const Header = classes => {
+const Header = (classes) => {
   // state
-  const { isAuthenticated, details } = useSelector(state => state.auth);
+  const { isAuthenticated, details } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   // on click logout
@@ -45,7 +45,7 @@ const Header = classes => {
                 to={routes.userProfile.path}
                 color="inherit"
               >
-                {details.name}
+                {details.username}
               </Button>
 
               <Button color="inherit" onClick={onClickLogout}>
@@ -71,6 +71,7 @@ const Header = classes => {
               </Button>
             </>
           )}
+          <span>isAuthenticated: {isAuthenticated.toString()}</span>
         </Toolbar>
       </AppBar>
     </div>
@@ -82,4 +83,4 @@ Header.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withRouter(withStyles(styles)(Header));
+export default withStyles(styles)(Header);

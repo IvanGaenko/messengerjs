@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { throttle } from 'lodash';
 
 // App Imports
-import { io } from '../setup/socket';
+import { socket as io } from '../setup/socket';
 import {
   getRoom,
   getChatRoomMessage,

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 // App Imports
-import { io, socketEmit } from '../setup/socket';
+import { socket as io, socketEmit } from '../setup/socket';
 import { startTyping, stopTyping } from '../api/actions/typers';
 
 // Component

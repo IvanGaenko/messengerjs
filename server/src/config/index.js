@@ -11,18 +11,18 @@ if (!dotenv) {
 const options = {
   NODE_ENV: Joi.string().default('development'),
   DB_PORT: Joi.string().default(3000),
+  SERVER_PORT: Joi.string().default(3000),
   API_URL: Joi.string(),
   WEB_URL: Joi.string(),
   JWT_SECRET: Joi.string().required(),
+  RT_SECRET: Joi.string().required(),
   SALT_ROWS: Joi.number().integer(),
   DB_USERNAME: Joi.string(),
   DB_PASSWORD: Joi.string(),
   DB_NAME: Joi.string(),
 };
 
-const schema = Joi.object(options)
-  .unknown()
-  .required();
+const schema = Joi.object(options).unknown().required();
 
 const { error, value: config } = schema.validate(process.env);
 

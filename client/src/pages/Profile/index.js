@@ -11,7 +11,7 @@ import Button from '@material-ui/core/Button';
 import styles from './styles';
 
 // App Imports
-import { addFriend } from '../../api/actions/auth';
+// import { addFriend } from '../../api/actions/auth';
 import Section from '../../modules/Section';
 
 // Component
@@ -27,7 +27,7 @@ const Profile = ({ classes }) => {
 
   const onSend = event => {
     event.preventDefault();
-    dispatch(addFriend(searchId, details.friendList, details.id));
+    // dispatch(addFriend(searchId, details.friendList, details.id));
     setSearchId('');
   };
 
@@ -42,7 +42,7 @@ const Profile = ({ classes }) => {
           Sunt consiliumes convertam nobilis, neuter cobaltumes.
         </Typography>
 
-        <Typography>Name: {details.name}</Typography>
+        <Typography>Username: {details.username}</Typography>
         <Typography>Email: {details.email}</Typography>
 
         <form onSubmit={onSend} className={classes.root}>

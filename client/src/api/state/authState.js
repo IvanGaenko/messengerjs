@@ -26,7 +26,8 @@ export default (state = authInitialState, action) => {
     case SET_USER:
       return {
         ...state,
-        isAuthenticated: !isEmpty(action.user),
+        // isAuthenticated: !isEmpty(action.user),
+        isAuthenticated: !!action.user.id,
         details: action.user,
       };
 

@@ -1,6 +1,7 @@
 // App Imports
 import database, { Sequelize } from '../models';
-const Op = Sequelize.Op;
+import { Op } from 'sequelize';
+// const Op = Sequelize.Op;
 
 class MessageService {
   static async createChatMessage(newMessage) {

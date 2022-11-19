@@ -1,8 +1,7 @@
 // Imports
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Redirect } from 'react-router';
+import { Link, Navigate } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 
 // App Imports
@@ -14,12 +13,12 @@ function Login(props) {
   // state
   const [user, setUser] = useState({ email: '', password: '' });
   const { isLoading, error, isAuthenticated } = useSelector(
-    state => state.auth,
+    (state) => state.auth,
   );
   const dispatch = useDispatch();
 
   // on login
-  const onLogin = async event => {
+  const onLogin = async (event) => {
     event.preventDefault();
 
     if (!isEmpty(user.email) && !isEmpty(user.password)) {
@@ -28,7 +27,7 @@ function Login(props) {
   };
 
   // on change
-  const onChange = event => {
+  const onChange = (event) => {
     setUser({
       ...user,
       [event.target.name]: event.target.value.trim(),
@@ -37,7 +36,7 @@ function Login(props) {
 
   // on success login
   if (isAuthenticated) {
-    return <Redirect to={routes.home.path} />;
+    return <Navigate to={routes.home.path} />;
   }
 
   return (
