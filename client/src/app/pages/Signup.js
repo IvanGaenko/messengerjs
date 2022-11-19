@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import AuthService from '../services/auth.service';
+import { getCurrent } from '../slices/user.slice';
 
 const Signup = () => {
   const [user, setUser] = useState({
@@ -10,6 +12,8 @@ const Signup = () => {
     password: '',
     repeatPassword: '',
   });
+  const [error, setError] = useState('');
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const onChange = (event) => {
@@ -23,14 +27,17 @@ const Signup = () => {
     event.preventDefault();
 
     if (user.email && user.password && user.password === user.repeatPassword) {
-      const response = await AuthService.makeSignup({
-        email: user.email,
-        username: user.username,
-        password: user.password,
-      });
-
-      if (response.status < 300) {
-        navigate('/login');
+      try {
+        await AuthService.makeSignup({
+          email: user.email,
+          username: user.username,
+          password: user.password,
+        });
+        dispatch(getCurrent());
+        navigate('/profile');
+      } catch (err) {
+        console.log('err', err);
+        setError(err.message);
       }
     }
   };
@@ -73,7 +80,7 @@ const Signup = () => {
 
         <input
           name="repeatPassword"
-          type="repeatPassword"
+          type="password"
           value={user.repeatPassword}
           onChange={onChange}
           label="Repeat Password"
@@ -82,6 +89,7 @@ const Signup = () => {
         />
 
         <input type="submit" />
+        <p>{error}</p>
       </form>
     </>
   );

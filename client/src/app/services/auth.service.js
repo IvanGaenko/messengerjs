@@ -51,6 +51,11 @@ class AuthService {
         { withCredentials: true },
       );
       console.log('response', response);
+      setAuthData({
+        accessToken: response.data.data.accessToken,
+        exp: parseTokenData(response.data.data.accessToken).exp,
+      });
+
       return new ResponseWrapper(
         response,
         response.data.data,
