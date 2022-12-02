@@ -49,8 +49,6 @@ export class ErrorWrapper extends Error {
   constructor(error, message) {
     super();
     this.success = error.response ? error.response.data.success : false;
-    this.meta = error.response ? error.response.data.meta : false;
-    this.code = error.response ? error.response.data.code : false;
     this.status = error.response ? error.response.status : false;
     this.statusMessage = _getStatusMessage(this.status);
     this.message = message || _getResponseErrorMessage(error);

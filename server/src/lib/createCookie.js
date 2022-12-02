@@ -6,6 +6,8 @@ const createCookie = (res, token, name, maxAge) => {
     maxAge,
     secure: process.env.NODE_ENV === 'production' ? true : false,
     path: '/auth',
+    sameSite: 'strict',
+    signed: true,
   };
 
   return res.cookie(name, token, cookieOption);

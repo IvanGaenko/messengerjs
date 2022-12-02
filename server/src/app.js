@@ -1,5 +1,5 @@
 // Imports
-import express from 'express';
+import express, { json, urlencoded } from 'express';
 
 // App Imports
 import database from './loaders/database';
@@ -13,7 +13,7 @@ const app = express();
 database();
 
 // Setup middlewares
-middlewares(app, express);
+middlewares(app, json, urlencoded);
 
 // Start server
 start(app);

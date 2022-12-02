@@ -10,6 +10,13 @@ const dbUsername = process.env.DB_USERNAME;
 const dbPassword = process.env.DB_PASSWORD;
 const dbPort = process.env.DB_PORT || 5432;
 
+const pool = {
+  max: 5,
+  min: 0,
+  acquire: 30000,
+  idle: 10000,
+};
+
 module.exports = {
   development: {
     username: dbUsername,
@@ -18,6 +25,8 @@ module.exports = {
     host: dbHost,
     port: dbPort,
     dialect: 'postgres',
+    logging: false,
+    pool,
   },
   production: {
     username: dbUsername,
@@ -26,5 +35,7 @@ module.exports = {
     host: dbHost,
     prot: dbPort,
     dialect: 'postgres',
+    logging: false,
+    pool,
   },
 };

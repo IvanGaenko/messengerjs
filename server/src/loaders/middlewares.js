@@ -5,21 +5,27 @@ import morgan from 'morgan';
 import Cors from 'cors';
 
 // App Imports
-import { CORS_whitelist as CORSWhitelist } from '../config/env';
+import {
+  CORS_whitelist as CORSWhitelist,
+  cookieSecretKey,
+} from '../config/env';
 import apiRouter from '../routes';
+import corsMiddleware from '../middleware/corsMiddleware';
 
 // Setup middlewares
-export default (app, express) => {
+export default (app, json, urlencoded) => {
   console.info('SETUP - Middlewares..');
 
   // Enable helmet
   app.use(helmet());
 
   // Request body parser
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: false }));
+  app.use(json());
+  app.use(urlencoded({ extended: false }));
 
-  app.use(cookieParser());
+  app.use(corsMiddleware());
+
+  app.use(cookieParser(cookieSecretKey));
 
   // HTTP logger
   app.use(morgan('dev'));
@@ -49,6 +55,7 @@ export default (app, express) => {
   });
 
   app.use(apiRouter);
+
   app.all('*', async (req, res) => {
     res.status(404).json({
       status: 'error',

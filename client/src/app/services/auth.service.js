@@ -3,9 +3,10 @@ import {
   load as fpPromise,
   hashComponents,
 } from '@fingerprintjs/fingerprintjs';
-import { redirect } from 'react-router-dom';
+// import { redirect } from 'react-router-dom';
 
 import { store } from '../store';
+import { socket } from '../socket';
 import { Http } from './http.init';
 import { setCurrentUser } from '../slices/user.slice';
 import { setToken } from '../slices/auth.slice';
@@ -27,16 +28,28 @@ class AuthService {
       );
       console.log('response', response);
 
+      const { accessToken } = response.data.data;
       setAuthData({
-        accessToken: response.data.data.accessToken,
-        exp: parseTokenData(response.data.data.accessToken).exp,
+        accessToken,
+        exp: parseTokenData(accessToken).exp,
       });
+
+      socket.auth.token = BEARER;
+      socket.connect();
+
       return new ResponseWrapper(
         response,
         response.data.data,
         response.data.message,
       );
     } catch (error) {
+      console.log('error', error);
+      const { message } = error.response.data;
+      setAuthData({
+        accessToken: '',
+        exp: '',
+        message,
+      });
       throw new ErrorWrapper(error);
     }
   }
@@ -51,10 +64,15 @@ class AuthService {
         { withCredentials: true },
       );
       console.log('response', response);
+
+      const { accessToken } = response.data.data;
       setAuthData({
-        accessToken: response.data.data.accessToken,
-        exp: parseTokenData(response.data.data.accessToken).exp,
+        accessToken,
+        exp: parseTokenData(accessToken).exp,
       });
+
+      socket.auth.token = BEARER;
+      socket.connect();
 
       return new ResponseWrapper(
         response,
@@ -62,6 +80,12 @@ class AuthService {
         response.data.message,
       );
     } catch (error) {
+      const { message } = error.response.data;
+      setAuthData({
+        accessToken: '',
+        exp: '',
+        message,
+      });
       throw new ErrorWrapper(error);
     }
   }
@@ -73,8 +97,11 @@ class AuthService {
         {},
         { withCredentials: true },
       );
-      resetAuthData();
-      redirect('/login');
+
+      socket.disconnect();
+
+      resetAuthData({});
+
       return new ResponseWrapper(
         response,
         response.data.data,
@@ -96,19 +123,26 @@ class AuthService {
         { withCredentials: true },
       );
 
+      console.log('response refresh', response);
+
+      const { accessToken } = response.data.data;
       setAuthData({
-        accessToken: response.data.data.accessToken,
-        exp: parseTokenData(response.data.data.accessToken).exp,
+        accessToken,
+        exp: parseTokenData(accessToken).exp,
       });
+
+      socket.auth.token = BEARER;
+      socket.connect();
+
       return new ResponseWrapper(
         response,
         response.data.data,
         response.data.message,
       );
     } catch (error) {
-      console.log(error);
-      resetAuthData();
-      redirect('/login');
+      console.log('error', error.response.data);
+      socket.disconnect();
+      resetAuthData({ isError: true, message: error.response.data.message });
       throw new ErrorWrapper(error);
     }
   }
@@ -164,14 +198,23 @@ class AuthService {
   }
 }
 
-function setAuthData({ accessToken, exp } = {}) {
+function setAuthData({
+  accessToken = '',
+  exp = '',
+  message = '',
+  sessionError = false,
+} = {}) {
   const { dispatch } = store;
-  AuthService.setRefreshToken('true');
-  AuthService.setBearer(accessToken);
+  AuthService.setRefreshToken(accessToken ? 'true' : '');
+  if (accessToken) {
+    AuthService.setBearer(accessToken);
+  }
   dispatch(
     setToken({
       accessToken,
       accessTokenExpDate: exp,
+      message,
+      sessionError,
     }),
   );
 }
@@ -211,13 +254,22 @@ async function getFingerprint() {
   }
 }
 
-function resetAuthData() {
+function resetAuthData({ isError = false, message = '' }) {
+  console.log('isError', isError, message);
   const { dispatch } = store;
-  dispatch(setCurrentUser({}));
+  dispatch(
+    setCurrentUser({
+      id: null,
+      username: '',
+      email: '',
+    }),
+  );
   dispatch(
     setToken({
       accessToken: '',
       accessTokenExpDate: null,
+      message,
+      sessionError: isError ? true : false,
     }),
   );
 

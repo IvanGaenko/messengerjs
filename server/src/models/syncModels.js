@@ -11,7 +11,9 @@ const syncModels = async (db) => {
     // await Conversation.sync();
     // await UserToConversation.sync();
     // await Message.sync();
-    console.log('synced');
+    console.log(
+      `Models ${user.name}, ${refreshSession.name} have been synced successfully.`,
+    );
   } catch (error) {
     console.error(error);
   }

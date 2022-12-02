@@ -14,7 +14,7 @@ export class Http {
   }
 
   init() {
-    console.log('here');
+    console.log('entering http');
     if (this.isAuth) {
       this.instance.interceptors.request.use(
         (request) => {
@@ -26,7 +26,7 @@ export class Http {
           ) {
             return AuthService.debounceRefreshTokens()
               .then((response) => {
-                console.log('response', response);
+                console.log('new refresh token', response);
                 AuthService.setBearer(response.data.accessToken);
                 request.headers.authorization = AuthService.getBearer();
                 return request;

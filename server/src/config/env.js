@@ -4,6 +4,7 @@ import {
   SERVER_PORT,
   JWT_SECRET,
   RT_SECRET,
+  COOKIE_SECRET_KEY,
   JWT_ACCESS_EXPIRES,
   JWT_REFRESH_EXPIRES,
   COOKIE_ACCESS_EXPIRES,
@@ -19,6 +20,7 @@ export const node_env = NODE_ENV;
 // Security
 export const jwtAccSecret = JWT_SECRET;
 export const jwtRtSecret = RT_SECRET;
+export const cookieSecretKey = COOKIE_SECRET_KEY;
 export const jwtAccExpires = JWT_ACCESS_EXPIRES;
 export const jwtRtExpires = JWT_REFRESH_EXPIRES;
 export const cookieAccExpires = COOKIE_ACCESS_EXPIRES;
@@ -57,4 +59,9 @@ export const api_url = API_URL;
 export const web_url = WEB_URL;
 
 // CORS whitelist
-export const CORS_whitelist = [api_url, web_url, '/'];
+export const CORS_whitelist = [
+  api_url,
+  web_url,
+  '/',
+  'http://192.168.0.105:3001',
+];

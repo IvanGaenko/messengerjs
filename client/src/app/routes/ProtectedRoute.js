@@ -2,13 +2,24 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const ProtectedRoute = ({ redirectPath = 'login', children }) => {
-  const { accessToken } = useSelector((state) => state.auth);
-  if (!accessToken) {
+import AuthService from '../services/auth.service';
+
+const ProtectedRoute = ({ redirectPath = 'login' }) => {
+  const { accessToken, sessionError } = useSelector((state) => state.auth);
+
+  if (!accessToken && AuthService.hasRefreshToken()) {
+    return <p>Loading...</p>;
+  }
+
+  if (!accessToken && !AuthService.hasRefreshToken()) {
     return <Navigate to={redirectPath} replace />;
   }
 
-  return children ? children : <Outlet />;
+  if (sessionError) {
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

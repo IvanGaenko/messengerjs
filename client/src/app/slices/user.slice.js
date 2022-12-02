@@ -22,17 +22,18 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setCurrentUser: (state, action) => {
-      state.id = action.id || null;
-      state.username = action.username || '';
-      state.email = action.email || '';
+      const { id, username, email } = action.payload;
+      state.id = id;
+      state.username = username;
+      state.email = email;
     },
   },
   extraReducers: (builder) => {
     builder.addCase(getCurrent.fulfilled, (state, action) => {
-      console.log('getCurrent', action);
-      state.id = action.payload.id;
-      state.username = action.payload.username;
-      state.email = action.payload.email;
+      const { id, username, email } = action.payload;
+      state.id = id;
+      state.username = username;
+      state.email = email;
     });
     builder.addCase(getCurrent.rejected, (state) => {
       state.id = null;

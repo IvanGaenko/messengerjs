@@ -3,6 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   accessToken: '',
   accessTokenExpDate: null,
+  message: '',
+  sessionError: false,
 };
 
 const authSlice = createSlice({
@@ -10,8 +12,17 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setToken(state, action) {
-      state.accessToken = action.payload.accessToken || '';
-      state.accessTokenExpDate = action.payload.accessTokenExpDate || null;
+      const {
+        accessToken,
+        accessTokenExpDate,
+        message = '',
+        sessionError = false,
+      } = action.payload;
+      state.accessToken = accessToken || '';
+      state.accessTokenExpDate = accessTokenExpDate || null;
+      state.message = message;
+      state.sessionError = sessionError;
+      console.log('action.payload', action.payload);
     },
   },
 });

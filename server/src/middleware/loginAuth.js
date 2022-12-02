@@ -1,5 +1,5 @@
 import { findUser } from '../services/account.service';
-import GlobalError from '../lib/GlobalError';
+// import GlobalError from '../lib/GlobalError';
 import { comparePassword } from '../lib/passwordOp';
 
 const loginAuth = async (req, res, next) => {
@@ -8,11 +8,20 @@ const loginAuth = async (req, res, next) => {
   const user = await findUser(email);
 
   if (!user) {
-    return next(new GlobalError('Invalid credential', 400));
+    return res.status(400).json({
+      success: false,
+      message: 'Incorrect email or password.',
+      data: {},
+    });
   }
 
   if (!(await comparePassword(password, user.password))) {
-    return next(new GlobalError('Invalid credential', 400));
+    // return next(new GlobalError('Incorrect username or password.', 400));
+    return res.status(400).json({
+      success: false,
+      message: 'Incorrect email or password.',
+      data: {},
+    });
   }
 
   req.body.user = user.toJSON();

@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
+    lastActivity: {
+      type: DataTypes.BIGINT,
+      // allowNull: false,
+    },
   });
 
   return RefreshSession;

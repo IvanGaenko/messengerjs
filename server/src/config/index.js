@@ -14,6 +14,7 @@ const options = {
   SERVER_PORT: Joi.string().default(3000),
   API_URL: Joi.string(),
   WEB_URL: Joi.string(),
+  COOKIE_SECRET_KEY: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   RT_SECRET: Joi.string().required(),
   SALT_ROWS: Joi.number().integer(),

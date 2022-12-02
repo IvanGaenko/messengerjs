@@ -5,10 +5,12 @@ import AuthService from '../services/auth.service';
 
 const Profile = () => {
   const { id, username, email } = useSelector((state) => state.user);
+
   const onLogout = () => {
     console.log('logout');
     AuthService.makeLogout();
   };
+
   return (
     <>
       <p>Profile</p>

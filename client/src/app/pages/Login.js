@@ -1,65 +1,118 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import AuthService from '../services/auth.service';
 import { getCurrent } from '../slices/user.slice';
+import { socket } from '../socket';
 
 const Login = () => {
-  const [user, setUser] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const { accessToken, message } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const onChange = (event) => {
-    setUser({
-      ...user,
-      [event.target.name]: event.target.value.trim(),
+  useEffect(() => {
+    socket.on('error', (err) => {
+      console.log('connect_error', err);
     });
-  };
+    return () => {
+      socket.off('error');
+    };
+  });
 
-  const onLogin = async (event) => {
-    event.preventDefault();
-    try {
-      await AuthService.makeLogin({
-        email: user.email,
-        password: user.password,
+  const schema = Yup.object().shape({
+    email: Yup.string().email().required('Email is a required field'),
+    password: Yup.string().required('Password is a required field'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema: schema,
+    onSubmit: (values) => onLogin(values),
+  });
+
+  const onLogin = async (values) => {
+    const { email, password } = values;
+    formik.values.password = '';
+    await AuthService.makeLogin({
+      email,
+      password,
+    });
+
+    dispatch(getCurrent())
+      .unwrap()
+      .then((data) => {
+        // console.log('login token', socket.auth);
+        // socket.auth.token = accessToken;
+        // socket.connect();
+        navigate(`/${data.username}`);
       });
-      dispatch(getCurrent());
-      navigate('/profile');
-    } catch (err) {
-      console.log('err', err);
-      setError(err.message);
-    }
   };
 
   return (
-    <form onSubmit={onLogin}>
+    <form onSubmit={formik.handleSubmit}>
+      <label htmlFor="email">Email:</label>
       <input
+        id="email"
         type="email"
         name="email"
-        value={user.email}
-        onChange={onChange}
-        label="Email"
+        value={formik.values.email}
+        onChange={formik.handleChange}
         placeholder="Enter email"
-        required={true}
-        autoFocus
       />
+      {formik.touched.email && formik.errors.email ? (
+        <div>{formik.errors.email}</div>
+      ) : null}
 
+      <label htmlFor="password">Password:</label>
       <input
         name="password"
         type="password"
-        value={user.password}
-        onChange={onChange}
-        label="Password"
+        value={formik.values.password}
+        onChange={formik.handleChange}
         placeholder="Enter passwrod"
-        required={true}
       />
+      {formik.touched.password && formik.errors.password ? (
+        <div>{formik.errors.password}</div>
+      ) : null}
 
-      <input type="submit" />
-      <p>{error}</p>
+      <button type="submit" disabled={formik.isSubmitting}>
+        {formik.isSubmitting ? 'Sign In...' : 'Sign In'}
+      </button>
+      {message && <p>{message}</p>}
     </form>
   );
+
+  // <form onSubmit={onLogin}>
+  //   <input
+  //     type="email"
+  //     name="email"
+  //     value={user.email}
+  //     onChange={onChange}
+  //     label="Email"
+  //     placeholder="Enter email"
+  //     required={true}
+  //     autoFocus
+  //   />
+
+  //   <input
+  //     name="password"
+  //     type="password"
+  //     value={user.password}
+  //     onChange={onChange}
+  //     label="Password"
+  //     placeholder="Enter passwrod"
+  //     required={true}
+  //   />
+
+  //   <input type="submit" />
+  //   <p>{error}</p>
+  // </form>
 };
 
 export default Login;

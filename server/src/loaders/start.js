@@ -6,15 +6,16 @@ import moment from 'moment';
 // App imports
 import db from '../models';
 import { port, node_env as nodeEnv } from '../config/env';
-// import chat from '../socket';
+import socket from '../socket';
 
 // Start server
 export default (app) => {
   console.info('SETUP - Starting server..');
+  console.log(`Worker ${process.pid} started`);
 
   // Create server
   const server = http.createServer(app);
-  // chat(server);
+  socket(server);
 
   const serverProcess = server.listen(port, (error) => {
     if (error) {

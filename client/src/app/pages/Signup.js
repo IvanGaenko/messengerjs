@@ -1,97 +1,117 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import AuthService from '../services/auth.service';
 import { getCurrent } from '../slices/user.slice';
+import socket from '../socket';
 
 const Signup = () => {
-  const [user, setUser] = useState({
-    email: '',
-    username: '',
-    password: '',
-    repeatPassword: '',
-  });
-  const [error, setError] = useState('');
+  const { message } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const onChange = (event) => {
-    setUser({
-      ...user,
-      [event.target.name]: event.target.value.trim(),
+  const schema = Yup.object().shape({
+    email: Yup.string()
+      .email()
+      .required('Email is a required field')
+      .email('Invalid email format'),
+    username: Yup.string().required('Username is a required field'),
+    password: Yup.string()
+      .required('Password is a required field')
+      .min(6, 'Password must be at least 6 characters'),
+    repeatPassword: Yup.string()
+      .required('Repeat password is a required field')
+      .min(6, 'Repeat password must be at least 6 characters')
+      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      username: '',
+      password: '',
+      repeatPassword: '',
+    },
+    validationSchema: schema,
+    onSubmit: (values) => onSignup(values),
+  });
+
+  const onSignup = async (values) => {
+    const { email, username, password } = values;
+
+    await AuthService.makeSignup({
+      email,
+      username,
+      password,
     });
-  };
 
-  const onSignup = async (event) => {
-    event.preventDefault();
-
-    if (user.email && user.password && user.password === user.repeatPassword) {
-      try {
-        await AuthService.makeSignup({
-          email: user.email,
-          username: user.username,
-          password: user.password,
-        });
-        dispatch(getCurrent());
-        navigate('/profile');
-      } catch (err) {
-        console.log('err', err);
-        setError(err.message);
-      }
-    }
+    dispatch(getCurrent())
+      .unwrap()
+      .then((data) => {
+        socket.init();
+        navigate(`/${data.username}`);
+      });
   };
 
   return (
-    <>
-      <p>Signup</p>
-      <form onSubmit={onSignup}>
-        <input
-          type="username"
-          name="username"
-          value={user.username}
-          onChange={onChange}
-          label="Username"
-          placeholder="Enter username"
-          required={true}
-          autoFocus
-        />
+    <form onSubmit={formik.handleSubmit}>
+      <label htmlFor="email">Username:</label>
+      <input
+        type="username"
+        name="username"
+        value={formik.values.username}
+        onChange={formik.handleChange}
+        placeholder="Enter username"
+      />
+      {formik.touched.username && formik.errors.username ? (
+        <div>{formik.errors.username}</div>
+      ) : null}
 
-        <input
-          type="email"
-          name="email"
-          value={user.email}
-          onChange={onChange}
-          label="Email"
-          placeholder="Enter email"
-          required={true}
-          autoFocus
-        />
+      <label htmlFor="email">Email:</label>
+      <input
+        id="email"
+        type="email"
+        name="email"
+        value={formik.values.email}
+        onChange={formik.handleChange}
+        placeholder="Enter email"
+      />
+      {formik.touched.email && formik.errors.email ? (
+        <div>{formik.errors.email}</div>
+      ) : null}
 
-        <input
-          name="password"
-          type="password"
-          value={user.password}
-          onChange={onChange}
-          label="Password"
-          placeholder="Enter passwrod"
-          required={true}
-        />
+      <label htmlFor="email">Password:</label>
+      <input
+        name="password"
+        type="password"
+        value={formik.values.password}
+        onChange={formik.handleChange}
+        placeholder="Enter passwrod"
+      />
+      {formik.touched.password && formik.errors.password ? (
+        <div>{formik.errors.password}</div>
+      ) : null}
 
-        <input
-          name="repeatPassword"
-          type="password"
-          value={user.repeatPassword}
-          onChange={onChange}
-          label="Repeat Password"
-          placeholder="Repeat Password"
-          required={true}
-        />
+      <label htmlFor="email">Repeat Password:</label>
+      <input
+        name="repeatPassword"
+        type="password"
+        value={formik.values.repeatPassword}
+        onChange={formik.handleChange}
+        placeholder="Repeat Password"
+      />
+      {formik.touched.repeatPassword && formik.errors.repeatPassword ? (
+        <div>{formik.errors.repeatPassword}</div>
+      ) : null}
 
-        <input type="submit" />
-        <p>{error}</p>
-      </form>
-    </>
+      <button type="submit" disabled={formik.isSubmitting}>
+        {formik.isSubmitting ? 'Sign Up...' : 'Sign Up'}
+      </button>
+      {message && <p>{message}</p>}
+    </form>
   );
 };
 
