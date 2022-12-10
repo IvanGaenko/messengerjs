@@ -4,7 +4,7 @@ const createCookie = (res, token, name, maxAge) => {
     httpOnly: true,
     // expires: new Date(Date.now() + expires * 24 * 60 * 60 * 1000),
     maxAge,
-    secure: process.env.NODE_ENV === 'production' ? true : false,
+    secure: process.env.NODE_ENV === 'production',
     path: '/auth',
     sameSite: 'strict',
     signed: true,

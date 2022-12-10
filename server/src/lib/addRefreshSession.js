@@ -1,8 +1,13 @@
+// import {
+//   getCountRefreshSessions,
+//   createRefreshSession,
+//   removeRefreshSessionById,
+// } from '../services/account.service';
 import {
   getCountRefreshSessions,
   createRefreshSession,
   removeRefreshSessionById,
-} from '../services/account.service';
+} from '../services/refreshSession.service';
 import { maxRefreshSessionsCount } from '../config/env';
 
 export async function addRefreshSession(refreshSession) {

@@ -10,7 +10,7 @@ import {
 } from '../config/env';
 
 export function makeAccessToken(user) {
-  let config = {
+  const config = {
     payload: {
       tokenType: accessTokenType,
       username: user.username,
@@ -28,7 +28,7 @@ export function makeAccessToken(user) {
 }
 
 export function makeRefreshToken(user) {
-  let config = {
+  const config = {
     payload: {
       tokenType: refreshTokenType,
       username: user.username,

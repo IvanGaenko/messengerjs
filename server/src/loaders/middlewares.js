@@ -5,10 +5,7 @@ import morgan from 'morgan';
 import Cors from 'cors';
 
 // App Imports
-import {
-  CORS_whitelist as CORSWhitelist,
-  cookieSecretKey,
-} from '../config/env';
+import { corsWhitelist, cookieSecretKey } from '../config/env';
 import apiRouter from '../routes';
 import corsMiddleware from '../middleware/corsMiddleware';
 
@@ -35,7 +32,7 @@ export default (app, json, urlencoded) => {
     origin: (origin, callback) => {
       console.log('origin', origin);
       if (!origin) return callback(null, true);
-      if (CORSWhitelist.indexOf(origin) !== -1) {
+      if (corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

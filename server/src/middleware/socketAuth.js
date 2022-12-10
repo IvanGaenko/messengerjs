@@ -4,20 +4,14 @@ import { jwtAccSecret } from '../config/env';
 import { findUser } from '../services/account.service';
 
 export default async (socket, next) => {
-  const socketToken = socket.handshake.auth
-    ? socket.handshake.auth.token
-    : null;
-  console.log('no error?-------------------------------', socketToken);
+  const socketToken = socket.handshake.auth ?
+    socket.handshake.auth.token :
+    null;
 
   if (!socketToken) {
     return next(new GlobalError('You are not logged in', 401));
-    // return res.status(401).json({
-    //   success: false,
-    //   message: 'You are not logged in.',
-    //   data: {},
-    // });
   }
-  console.log('--------------------------');
+
   const [, token] = socketToken.split(' ');
 
   try {
@@ -28,11 +22,11 @@ export default async (socket, next) => {
 
     const freshUser = await findUser(decoded.email);
 
-    const { id, username, email } = freshUser.toJSON();
-
-    if (!id) {
-      return next(new GlobalError('user from does not exist', 401));
+    if (!freshUser) {
+      return next(new GlobalError('Wrong credentials', 401));
     }
+
+    const { id, username, email } = freshUser.toJSON();
 
     if (decoded.username !== username || decoded.email !== email) {
       return next(

@@ -6,17 +6,20 @@ import createCookie from '../lib/createCookie';
 import { hashPassword } from '../lib/passwordOp';
 import {
   findOrCreateUser,
-  findByRefreshToken,
+  updateUser,
   findByPk,
-  removeRefreshSession,
 } from '../services/account.service';
+import {
+  findByRefreshToken,
+  removeRefreshSession,
+} from '../services/refreshSession.service';
 import { addRefreshSession } from '../lib/addRefreshSession';
 import { makeAccessToken } from '../lib/makeAccessToken';
+import { seed } from '../models/seed';
 
 export const loginController = async (req, res) => {
   const { user, fingerprint } = req.body;
   console.log('user', user);
-  console.log('time', new Date().getTime());
   const refTokenExpiresInMilliseconds = new Date().getTime() + ms(jwtRtExpires);
   const refTokenExpiresInSeconds = parseInt(
     refTokenExpiresInMilliseconds / 1000,
@@ -36,6 +39,8 @@ export const loginController = async (req, res) => {
 
   const accessToken = makeAccessToken(user);
 
+  await updateUser(user.id, { isOnline: true });
+
   createCookie(
     res,
     newRefreshSession.refreshToken,
@@ -53,6 +58,7 @@ export const loginController = async (req, res) => {
 };
 
 export const signupController = async (req, res) => {
+  await seed();
   const { email, username, password, fingerprint } = req.body;
   const refTokenExpiresInMilliseconds = new Date().getTime() + ms(jwtRtExpires);
   const refTokenExpiresInSeconds = parseInt(
@@ -66,6 +72,7 @@ export const signupController = async (req, res) => {
     username,
     email: email.toLowerCase(),
     password: await hashPassword(password),
+    isOnline: false,
   });
 
   if (!created) {
@@ -91,6 +98,8 @@ export const signupController = async (req, res) => {
   await addRefreshSession(newRefreshSession);
 
   const accessToken = makeAccessToken(user);
+
+  await updateUser(user.id, { isOnline: true });
 
   createCookie(
     res,
@@ -124,6 +133,8 @@ export const logoutController = async (req, res) => {
 
   await removeRefreshSession(refreshToken);
 
+  await updateUser(req.body.id, { isOnline: false });
+
   res.clearCookie('__rt');
 
   return res.status(200).json({
@@ -134,6 +145,7 @@ export const logoutController = async (req, res) => {
 };
 
 export const refreshTokensController = async (req, res) => {
+  console.log('hello');
   const reqRefreshToken = req.signedCookies.__rt || req.cookies.__rt;
   // req.cookies.__rt || req.body.__rt || req.signedCookies.__rt;
   const reqFingerprint = req.body.fingerprint;
@@ -164,7 +176,7 @@ export const refreshTokensController = async (req, res) => {
 
   await removeRefreshSession(reqRefreshToken);
 
-  console.log('oldRefreshSession', oldRefreshSession);
+  console.log('oldRefreshSession', oldRefreshSession.toJSON());
 
   const nowTime = new Date().getTime();
   if (nowTime > oldRefreshSession.expiresIn) {

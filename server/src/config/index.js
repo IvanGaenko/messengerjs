@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 // Load .env
 dotenv.config();
 if (!dotenv) {
-  throw new Error("⚠️  Couldn't find .env file  ⚠️");
+  throw new Error('⚠️  Couldn\'t find .env file  ⚠️');
 }
 
 const options = {

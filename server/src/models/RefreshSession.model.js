@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     lastActivity: {
       type: DataTypes.BIGINT,
-      // allowNull: false,
+      allowNull: false,
     },
   });
 

@@ -1,16 +1,23 @@
 import { Server } from 'socket.io';
+import { createClient } from 'redis';
+import { createAdapter } from '@socket.io/redis-adapter';
+// import { Op } from 'sequelize';
 
-import { CORS_whitelist as CORSWhitelist } from '../config/env';
+import { corsWhitelist } from '../config/env';
+import { setupWorker } from '@socket.io/sticky';
 import socketAuth from '../middleware/socketAuth';
+// import { updateUser } from '../services/account.service';
+// import db from '../models';
 
-export default (server) => {
+export default async (server) => {
   console.log('SETUP - Socket..');
+
   const io = new Server(server, {
     cors: {
       origin: (origin, callback) => {
         console.log('socket origin', origin);
         if (!origin) return callback(null, true);
-        if (CORSWhitelist.indexOf(origin) !== -1) {
+        if (corsWhitelist.indexOf(origin) !== -1) {
           callback(null, true);
         } else {
           callback(new Error('Not allowed by CORS'));
@@ -20,22 +27,93 @@ export default (server) => {
     },
   });
 
+  const client = createClient({ host: 'localhost', port: 6379 });
+  const subscriber = client.duplicate();
+
+  client.on('error', (err) => console.log('Redis Client Error', err));
+  subscriber.on('error', (err) => console.log('Redis Subscriber Error', err));
+
+  await client.connect();
+  await subscriber.connect();
+
+  io.adapter(createAdapter(client, subscriber));
+
+  setupWorker(io);
+
   io.use(socketAuth);
 
-  const onConnection = (socket) => {
-    console.log('⚡:Chat connected. Socket', socket.id);
-    console.log('Socket user', socket.user);
+  const users = {};
 
-    socket.on('click', (data) => {
-      console.log('click', data);
+  const onConnection = async (socket) => {
+    console.log('⚡: Chat connected. Socket', socket.id);
+    socket.join(socket.user.id);
+
+    if (!users[socket.user.id]) users[socket.user.id] = [];
+    users[socket.user.id].push(socket.id);
+
+    socket.on('disconnect', async () => {
+      console.log('🔥: Chat disconnected', socket.id);
+
+      users[socket.user.id] = users[socket.user.id].filter(
+        (user) => user !== socket.id,
+      );
+      if (users[socket.user.id].length === 0) {
+        delete users[socket.user.id];
+      }
     });
 
-    socket.on('disconnect', () => {
-      console.log('🔥: Chat disconnected', socket.id);
+    socket.on('logout', () => {
+      const pageUsers = users[socket.user.id];
+      for (const p of pageUsers) {
+        if (p !== socket.id) {
+          io.to(p).emit('doLogout', '');
+        }
+      }
+    });
+
+    // -----------------
+
+    socket.on('click', async (data) => {
+      const sockets = await io.in(socket.user.id).fetchSockets();
+      console.log('sockets', sockets.length);
+
+      // const myId = 1;
+      // const user = await db.user.findByPk(socket.user.id, {
+      //   // include: { all: true, nested: true },
+      //   attributes: ['id', 'username', 'email'],
+      //   include: {
+      //     model: db.conversation,
+      //     attributes: ['id', 'name'],
+      //     include: [
+      //       {
+      //         model: db.user,
+      //         where: {
+      //           id: {
+      //             [Op.ne]: socket.user.id,
+      //           },
+      //         },
+      //         // include: 'messages',
+      //         attributes: ['id', 'username', 'email'],
+      //       },
+      //       {
+      //         model: db.message,
+      //         as: 'messages',
+      //       },
+      //     ],
+      //   },
+      // });
+
+      // console.log('user with history', JSON.stringify(user, null, 2));
+      console.log('click', data);
+      socket.emit('res', data);
     });
   };
 
   io.on('connection', onConnection);
+
+  // io.of('/').adapter.on('error', function (error) {
+  //   console.log('error: ', error);
+  // });
 };
 
 //   console.log('socket.handshake.auth', socket.handshake.auth);

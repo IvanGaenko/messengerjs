@@ -17,9 +17,9 @@ const db = {};
 const modelDefiners = [
   require('./User.model'),
   require('./RefreshSession.model'),
-  // require('./Conversation.model'),
-  // require('./Message.model'),
-  // require('./UserToConversation.model'),
+  require('./Conversation.model'),
+  require('./Message.model'),
+  require('./UserToConversation.model'),
 ];
 
 for (const modelDefiner of modelDefiners) {

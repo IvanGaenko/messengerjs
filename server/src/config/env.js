@@ -15,7 +15,7 @@ import {
 } from '.';
 
 //Envronment
-export const node_env = NODE_ENV;
+export const nodeEnv = NODE_ENV;
 
 // Security
 export const jwtAccSecret = JWT_SECRET;
@@ -26,7 +26,7 @@ export const jwtRtExpires = JWT_REFRESH_EXPIRES;
 export const cookieAccExpires = COOKIE_ACCESS_EXPIRES;
 export const cookieRtExpires = COOKIE_REFRESH_EXPIRES;
 export const maxRefreshSessionsCount = 5;
-export const salt_rows = parseInt(SALT_ROWS, 10);
+export const saltRows = parseInt(SALT_ROWS, 10);
 export const accessTokenType = 'AccessToken';
 export const refreshTokenType = 'RefreshToken';
 export const jwtIss = 'messengerjs';
@@ -55,13 +55,8 @@ export const rules = {
 };
 
 // URL
-export const api_url = API_URL;
-export const web_url = WEB_URL;
+export const apiUrl = API_URL;
+export const webUrl = WEB_URL;
 
 // CORS whitelist
-export const CORS_whitelist = [
-  api_url,
-  web_url,
-  '/',
-  'http://192.168.0.105:3001',
-];
+export const corsWhitelist = [apiUrl, webUrl, '/', 'http://localhost:6379'];
