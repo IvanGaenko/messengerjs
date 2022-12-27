@@ -9,15 +9,15 @@ import { startTyping, stopTyping } from '../api/actions/typers';
 // Component
 const ChatRoomInput = () => {
   // State
-  const { typingStatus, user } = useSelector(state => state.typers);
-  const { room, connectionData } = useSelector(state => state.chat);
-  const { details } = useSelector(state => state.auth);
+  const { typingStatus, user } = useSelector((state) => state.typers);
+  const { room, connectionData } = useSelector((state) => state.chat);
+  const { details } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const [message, setMessage] = useState('');
 
   // On Change
-  const onChange = event => {
+  const onChange = (event) => {
     setMessage(event.target.value);
 
     sendStartTyping({
@@ -37,7 +37,7 @@ const ChatRoomInput = () => {
     });
   };
 
-  const sendStartTyping = data => {
+  const sendStartTyping = (data) => {
     socketEmit('typing', data);
     let timeout;
     clearTimeout(timeout);
@@ -45,7 +45,7 @@ const ChatRoomInput = () => {
   };
 
   // Send Message
-  const onSend = event => {
+  const onSend = (event) => {
     event.preventDefault();
 
     const data = {
@@ -59,22 +59,22 @@ const ChatRoomInput = () => {
   };
 
   useEffect(() => {
-    io.on('typing', data => {
+    io.on('typing', (data) => {
       if (data.id === details.id) {
         return;
       }
       if (room.chatId === data.roomName) {
-        console.log('hey! its typing!', data.user);
+        // console.log('hey! its typing!', data.user);
         dispatch(startTyping(data));
       }
     });
 
-    io.on('stop typing', data => {
+    io.on('stop typing', (data) => {
       if (data.id === details.id) {
         return;
       }
       if (room.chatId === data.roomName) {
-        console.log('hey! its stop typing!', data.user);
+        // console.log('hey! its stop typing!', data.user);
         dispatch(stopTyping(data));
       }
     });

@@ -1,13 +1,14 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 
 import AuthService from '../services/auth.service';
+import { socket } from '../socket';
 
 const Profile = () => {
   const { id, username, email } = useSelector((state) => state.user);
 
   const onLogout = () => {
-    console.log('logout');
+    // console.log('logout');
+    socket.emit('logout', '');
     AuthService.makeLogout();
   };
 

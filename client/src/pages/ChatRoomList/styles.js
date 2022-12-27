@@ -1,5 +1,5 @@
 // Component Styles
-const styles = theme => ({
+const styles = (theme) => ({
   container: {
     padding: theme.spacing(),
   },

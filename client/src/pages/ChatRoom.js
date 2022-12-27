@@ -32,9 +32,9 @@ function ChatRoom() {
   const [fetchMoreMessages, setFetchMoreMessages] = useState(false);
 
   const { room, isLoading, isRoomLoading, isMessageLoading } = useSelector(
-    state => state.chat,
+    (state) => state.chat,
   );
-  const { details } = useSelector(state => state.auth);
+  const { details } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const ref = React.createRef();
 
@@ -46,7 +46,7 @@ function ChatRoom() {
 
   // get Current Room
   const getCurrentRoom = async () => {
-    console.log('getCurrentRoom');
+    // console.log('getCurrentRoom');
     dispatch(getRoom(details.id, id, getMessageLimit));
     setInitialized(true);
   };
@@ -58,11 +58,11 @@ function ChatRoom() {
     if (!fetchMoreMessages) {
       limit = getMessageLimit;
       setFetchMoreMessages(true);
-      console.log('fetchMoreMessages if false', fetchMoreMessages);
-      console.log('limit true', limit);
+      // console.log('fetchMoreMessages if false', fetchMoreMessages);
+      // console.log('limit true', limit);
     } else {
       limit = getMessageLimit * 2;
-      console.log('limit false', limit);
+      // console.log('limit false', limit);
       // setFixedScroll(false);
     }
 
@@ -71,12 +71,12 @@ function ChatRoom() {
   };
 
   // Get New Message
-  const getNewMessages = async data => {
+  const getNewMessages = async (data) => {
     dispatch(getNewChatMessages(data));
   };
 
   // Update New Messages
-  const updateNewMessages = async data => {
+  const updateNewMessages = async (data) => {
     dispatch(updateClientMessages(data));
   };
 
@@ -100,7 +100,7 @@ function ChatRoom() {
     let diffScreen = scrollHeight - clientHeight;
 
     if (diffScreen - scrollTop > 20) {
-      console.log('im here');
+      // console.log('im here');
       setFixedScroll(false);
       fetchMoreMessage();
     } else {
@@ -115,9 +115,9 @@ function ChatRoom() {
   const throttledHandleScroll = throttle(handleScroll, 1000);
 
   const fetchMoreMessage = async () => {
-    console.log('got it!');
+    // console.log('got it!');
     // setFixedScroll(false);
-    console.log('fixedScroll before get', fixedScroll);
+    // console.log('fixedScroll before get', fixedScroll);
     if (!fixedScroll) {
       await getMessage();
     }
@@ -126,7 +126,7 @@ function ChatRoom() {
 
   const setupInitPosition = () => {
     if (!isLoading && !isRoomLoading && !isMessageLoading && !initPosition) {
-      console.log('initPosition', initPosition);
+      // console.log('initPosition', initPosition);
       ref.current.scrollIntoView(false);
       setInitPosition(true);
     }
@@ -154,18 +154,18 @@ function ChatRoom() {
     //   fetchMessage();
     // }
 
-    io.on('newMessage', async data => {
-      console.log('hey! new messages!');
+    io.on('newMessage', async (data) => {
+      // console.log('hey! new messages!');
       await getNewMessages(data);
       setClear(false);
-      console.log('fixedScroll', fixedScroll);
+      // console.log('fixedScroll', fixedScroll);
 
       if (fixedScroll) {
         setInitPosition(false);
       }
     });
 
-    io.on('updateMessage', async data => {
+    io.on('updateMessage', async (data) => {
       await updateNewMessages(data);
     });
 

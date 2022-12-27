@@ -14,19 +14,19 @@ export class Http {
   }
 
   init() {
-    console.log('entering http');
+    // console.log('entering http');
     if (this.isAuth) {
       this.instance.interceptors.request.use(
         (request) => {
           request.headers.authorization = AuthService.getBearer();
-          console.log('header', request.headers.authorization);
+          // console.log('header', request.headers.authorization);
           if (
             AuthService.isAccessTokenExpired() &&
             AuthService.hasRefreshToken()
           ) {
             return AuthService.debounceRefreshTokens()
               .then((response) => {
-                console.log('new refresh token', response);
+                // console.log('new refresh token', response);
                 AuthService.setBearer(response.data.accessToken);
                 request.headers.authorization = AuthService.getBearer();
                 return request;
@@ -37,7 +37,7 @@ export class Http {
           }
         },
         (error) => {
-          console.log('error', error);
+          // console.log('error', error);
           return Promise.reject(error);
         },
       );

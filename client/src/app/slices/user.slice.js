@@ -4,10 +4,10 @@ import UserService from '../services/user.service';
 export const getCurrent = createAsyncThunk('user/getCurrent', async () => {
   try {
     const data = await UserService.getCurrent();
-    console.log('data', data);
+    // console.log('data', data);
     return data.data;
   } catch (error) {
-    return (data.data.message = error.message);
+    return error.message;
   }
 });
 
@@ -15,6 +15,7 @@ const initialState = {
   id: null,
   username: '',
   email: '',
+  isOnline: false,
 };
 
 const userSlice = createSlice({
@@ -22,10 +23,10 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setCurrentUser: (state, action) => {
-      const { id, username, email } = action.payload;
-      state.id = id;
-      state.username = username;
-      state.email = email;
+      state.id = action.payload.id ?? state.id;
+      state.username = action.payload.username ?? state.username;
+      state.email = action.payload.email ?? state.email;
+      state.isOnline = action.payload.isOnline ?? state.isOnline;
     },
   },
   extraReducers: (builder) => {
@@ -34,6 +35,7 @@ const userSlice = createSlice({
       state.id = id;
       state.username = username;
       state.email = email;
+      state.isOnline = true;
     });
     builder.addCase(getCurrent.rejected, (state) => {
       state.id = null;

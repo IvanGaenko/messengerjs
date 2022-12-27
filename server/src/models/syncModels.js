@@ -10,7 +10,7 @@ const syncModels = async (db) => {
     await userToConversation.sync();
     await message.sync();
     console.log(
-      `Models ${user.name}, ${refreshSession.name} have been synced.`,
+      `Models ${user.name}, ${refreshSession.name} have been synced.`
     );
   } catch (error) {
     console.error(error);

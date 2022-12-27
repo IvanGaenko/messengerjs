@@ -12,13 +12,13 @@ import EditMessage from '../EditMessage';
 import Section from '../../modules/Section';
 
 // Component
-const ChatRoomList = classes => {
+const ChatRoomList = (classes) => {
   //State
-  const { messages, connectionData } = useSelector(state => state.chat);
+  const { messages, connectionData } = useSelector((state) => state.chat);
 
   return (
     <Section>
-      {messages.map(t => {
+      {messages.map((t) => {
         return (
           <div key={t.id} style={{ padding: '10px' }}>
             <span className={classes.container}>{t.author}:</span>

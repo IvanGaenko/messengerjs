@@ -15,14 +15,15 @@ import {
 } from '../services/refreshSession.service';
 import { addRefreshSession } from '../lib/addRefreshSession';
 import { makeAccessToken } from '../lib/makeAccessToken';
-import { seed } from '../models/seed';
+// import { seed } from '../models/seed';
 
 export const loginController = async (req, res) => {
+  // await seed();
   const { user, fingerprint } = req.body;
-  console.log('user', user);
+  // console.log('user', user);
   const refTokenExpiresInMilliseconds = new Date().getTime() + ms(jwtRtExpires);
   const refTokenExpiresInSeconds = parseInt(
-    refTokenExpiresInMilliseconds / 1000,
+    refTokenExpiresInMilliseconds / 1000
   );
 
   const newRefreshSession = {
@@ -33,7 +34,7 @@ export const loginController = async (req, res) => {
     lastActivity: new Date().getTime(),
   };
 
-  console.log('newRefreshSession login', newRefreshSession);
+  // console.log('newRefreshSession login', newRefreshSession);
 
   await addRefreshSession(newRefreshSession);
 
@@ -45,7 +46,7 @@ export const loginController = async (req, res) => {
     res,
     newRefreshSession.refreshToken,
     '__rt',
-    refTokenExpiresInSeconds,
+    refTokenExpiresInSeconds
   );
 
   return res.status(200).json({
@@ -58,11 +59,10 @@ export const loginController = async (req, res) => {
 };
 
 export const signupController = async (req, res) => {
-  await seed();
   const { email, username, password, fingerprint } = req.body;
   const refTokenExpiresInMilliseconds = new Date().getTime() + ms(jwtRtExpires);
   const refTokenExpiresInSeconds = parseInt(
-    refTokenExpiresInMilliseconds / 1000,
+    refTokenExpiresInMilliseconds / 1000
   );
 
   // const hashedPassword = await hashPassword(password);
@@ -93,7 +93,7 @@ export const signupController = async (req, res) => {
     lastActivity: new Date().getTime(),
   };
 
-  console.log('newRefreshSession', newRefreshSession);
+  // console.log('newRefreshSession', newRefreshSession);
 
   await addRefreshSession(newRefreshSession);
 
@@ -105,7 +105,7 @@ export const signupController = async (req, res) => {
     res,
     newRefreshSession.refreshToken,
     '__rt',
-    refTokenExpiresInSeconds,
+    refTokenExpiresInSeconds
   );
 
   return res.status(201).json({
@@ -118,7 +118,7 @@ export const signupController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
-  console.log('req cookie', req.signedCookies);
+  // console.log('req cookie', req.signedCookies);
   // const refreshToken = req.cookies.__rt;
   const refreshToken = req.signedCookies.__rt || req.cookies.__rt;
 
@@ -145,7 +145,7 @@ export const logoutController = async (req, res) => {
 };
 
 export const refreshTokensController = async (req, res) => {
-  console.log('hello');
+  // console.log('hello');
   const reqRefreshToken = req.signedCookies.__rt || req.cookies.__rt;
   // req.cookies.__rt || req.body.__rt || req.signedCookies.__rt;
   const reqFingerprint = req.body.fingerprint;
@@ -161,7 +161,7 @@ export const refreshTokensController = async (req, res) => {
 
   const refTokenExpiresInMilliseconds = new Date().getTime() + ms(jwtRtExpires);
   const refTokenExpiresInSeconds = parseInt(
-    refTokenExpiresInMilliseconds / 1000,
+    refTokenExpiresInMilliseconds / 1000
   );
 
   const oldRefreshSession = await findByRefreshToken(reqRefreshToken);
@@ -176,7 +176,7 @@ export const refreshTokensController = async (req, res) => {
 
   await removeRefreshSession(reqRefreshToken);
 
-  console.log('oldRefreshSession', oldRefreshSession.toJSON());
+  // console.log('oldRefreshSession', oldRefreshSession.toJSON());
 
   const nowTime = new Date().getTime();
   if (nowTime > oldRefreshSession.expiresIn) {
@@ -207,17 +207,19 @@ export const refreshTokensController = async (req, res) => {
     lastActivity: new Date().getTime(),
   };
 
-  console.log('newRefreshSession', newRefreshSession);
+  // console.log('newRefreshSession', newRefreshSession);
 
   await addRefreshSession(newRefreshSession);
 
   const accessToken = makeAccessToken(user);
 
+  await updateUser(user.id, { isOnline: true });
+
   createCookie(
     res,
     newRefreshSession.refreshToken,
     '__rt',
-    refTokenExpiresInSeconds,
+    refTokenExpiresInSeconds
   );
 
   return res.status(201).json({

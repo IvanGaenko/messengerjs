@@ -15,7 +15,7 @@ import {
 
 // Login a user using credentials
 export function login({ email, password }, isLoading = true) {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: LOGIN_REQUEST,
       isLoading,
@@ -28,7 +28,7 @@ export function login({ email, password }, isLoading = true) {
         params: { email, password },
       });
       const { data } = hello;
-      console.log('hello', hello);
+      // console.log('hello', hello);
       let error = data.message;
       if (data.success) {
         dispatch(setUser(data.data.token, data.data.rt, data.data.user));
@@ -41,14 +41,14 @@ export function login({ email, password }, isLoading = true) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 }
 
 // Set user after login or using local (AsyncStorage) token
 export function setUser(token, rt, user) {
-  console.log('user', user);
+  // console.log('user', user);
   if (token && rt) {
     axios.defaults.headers.common['Authentication'] = `Bearer ${token}`;
     axios.defaults.headers.common['RT'] = `Bearer ${rt}`;
@@ -65,7 +65,7 @@ export function setUser(token, rt, user) {
 
 // Log out user and remove token from local (AsyncStorage)
 export function logout() {
-  return dispatch => {
+  return (dispatch) => {
     unsetUserLocally();
 
     dispatch({

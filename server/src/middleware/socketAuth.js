@@ -4,9 +4,8 @@ import { jwtAccSecret } from '../config/env';
 import { findUser } from '../services/account.service';
 
 export default async (socket, next) => {
-  const socketToken = socket.handshake.auth ?
-    socket.handshake.auth.token :
-    null;
+  const { auth } = socket.handshake;
+  const socketToken = auth ? auth.token : null;
 
   if (!socketToken) {
     return next(new GlobalError('You are not logged in', 401));
@@ -17,7 +16,7 @@ export default async (socket, next) => {
   try {
     const decoded = jwt.verify(
       token === undefined ? socketToken : token,
-      jwtAccSecret,
+      jwtAccSecret
     );
 
     const freshUser = await findUser(decoded.email);
@@ -32,8 +31,8 @@ export default async (socket, next) => {
       return next(
         new GlobalError(
           'You are not logged in, please login with correct details',
-          401,
-        ),
+          401
+        )
       );
     }
 
@@ -51,7 +50,7 @@ export default async (socket, next) => {
 
     next();
   } catch (error) {
-    console.log('error', error);
+    console.log('socket auth error', error);
     return next(new GlobalError(error.message, error.status));
   }
 };

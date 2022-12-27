@@ -32,7 +32,7 @@ export default (app) => {
   } else {
     socket(server);
     server.listen(port, () =>
-      console.log(`Worker ${cluster.worker.id} launched on port ${port}.`),
+      console.log(`Worker ${cluster.worker.id} launched on port ${port}.`)
     );
   }
 };

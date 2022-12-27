@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false,
     },
+    lastActivity: {
+      type: DataTypes.STRING,
+      // allowNull: false,
+    },
     // fingerprint: {
     //   type: DataTypes.STRING,
     //   allowNull: false,

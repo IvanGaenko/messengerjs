@@ -39,4 +39,5 @@ class Socket {
 const socketIo = new Socket(io, API_URL);
 
 export const { socket } = socketIo;
+
 export default socketIo;

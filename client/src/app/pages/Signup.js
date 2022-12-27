@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useSelector, useDispatch } from 'react-redux';
@@ -6,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import AuthService from '../services/auth.service';
 import { getCurrent } from '../slices/user.slice';
-import socket from '../socket';
+// import socket from '../socket';
 
 const Signup = () => {
   const { message } = useSelector((state) => state.auth);
@@ -50,8 +49,9 @@ const Signup = () => {
 
     dispatch(getCurrent())
       .unwrap()
+      .catch((err) => console.log('data', err))
       .then((data) => {
-        socket.init();
+        // socket.init();
         navigate(`/${data.username}`);
       });
   };

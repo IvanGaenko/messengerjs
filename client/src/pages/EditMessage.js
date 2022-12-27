@@ -7,22 +7,22 @@ import { editChatMessages, deleteChatMessage } from '../api/actions/messages';
 import { socketEmit } from '../setup/socket';
 
 // Component
-const EditMessage = props => {
+const EditMessage = (props) => {
   const { id, author, message, connectionData } = props;
   //State
   const [editMode, setEditMode] = useState(false);
   const [editMessage, setEditMessage] = useState(message);
-  const { details } = useSelector(state => state.auth);
+  const { details } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
   // On Change
-  const onChange = event => {
+  const onChange = (event) => {
     setEditMessage(event.target.value);
   };
 
   // Complete Edit
-  const onSubmitEdit = event => {
+  const onSubmitEdit = (event) => {
     event.preventDefault();
     dispatch(editChatMessages(id, author, editMessage, connectionData));
     setEditMode(false);

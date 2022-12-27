@@ -10,6 +10,7 @@ import { socket } from '../socket';
 import { Http } from './http.init';
 import { setCurrentUser } from '../slices/user.slice';
 import { setToken } from '../slices/auth.slice';
+import { setChatList, setActiveChat } from '../slices/chat.slice';
 import { ResponseWrapper, ErrorWrapper } from './util';
 
 const API_URL = 'http://localhost:3002';
@@ -18,7 +19,7 @@ let BEARER = '';
 
 class AuthService {
   static async makeLogin({ email, password }) {
-    console.log('login', email, password);
+    // console.log('login', email, password);
     const fingerprint = await getFingerprint();
     try {
       const response = await axios.post(
@@ -26,7 +27,7 @@ class AuthService {
         { email, password, fingerprint },
         { withCredentials: true },
       );
-      console.log('response', response);
+      // console.log('response', response);
 
       const { accessToken } = response.data.data;
       setAuthData({
@@ -43,7 +44,7 @@ class AuthService {
         response.data.message,
       );
     } catch (error) {
-      console.log('error', error);
+      // console.log('error', error);
       const { message } = error.response.data;
       setAuthData({
         accessToken: '',
@@ -55,7 +56,7 @@ class AuthService {
   }
 
   static async makeSignup({ email, username, password }) {
-    console.log('signup', email, username, password);
+    // console.log('signup', email, username, password);
     const fingerprint = await getFingerprint();
     try {
       const response = await axios.post(
@@ -63,7 +64,7 @@ class AuthService {
         { email, username, password, fingerprint },
         { withCredentials: true },
       );
-      console.log('response', response);
+      // console.log('response', response);
 
       const { accessToken } = response.data.data;
       setAuthData({
@@ -91,10 +92,11 @@ class AuthService {
   }
 
   static async makeLogout() {
+    const state = store.getState();
     try {
       const response = await new Http({ auth: true }).post(
         'auth/logout',
-        {},
+        { id: state.user.id },
         { withCredentials: true },
       );
 
@@ -108,12 +110,13 @@ class AuthService {
         response.data.message,
       );
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new ErrorWrapper(error);
     }
   }
 
   static async refreshTokens() {
+    // console.log('trying to refresh token');
     try {
       const response = await axios.post(
         `${API_URL}/auth/refresh-tokens`,
@@ -123,7 +126,7 @@ class AuthService {
         { withCredentials: true },
       );
 
-      console.log('response refresh', response);
+      // console.log('response refresh', response);
 
       const { accessToken } = response.data.data;
       setAuthData({
@@ -140,9 +143,9 @@ class AuthService {
         response.data.message,
       );
     } catch (error) {
-      console.log('error', error.response.data);
+      // console.log('error', error);
       socket.disconnect();
-      resetAuthData({ isError: true, message: error.response.data.message });
+      resetAuthData({ isError: true, message: error.response?.data.message });
       throw new ErrorWrapper(error);
     }
   }
@@ -153,7 +156,7 @@ class AuthService {
 
   static setRefreshToken(status) {
     if (['', 'true'].includes(status)) {
-      console.log('set local storage', status);
+      // console.log('set local storage', status);
       localStorage.setItem('refreshToken', status);
     }
   }
@@ -169,10 +172,10 @@ class AuthService {
   static isAccessTokenExpired() {
     const state = store.getState();
     const accessTokenExpDate = state.auth.accessTokenExpDate - 10;
-    console.log('accessTokenExpDate', accessTokenExpDate);
+    // console.log('accessTokenExpDate', accessTokenExpDate);
     const nowTime = Math.floor(new Date().getTime() / 1000);
-    console.log('nowTime', nowTime);
-    console.log('expired?', accessTokenExpDate <= nowTime);
+    // console.log('nowTime', nowTime);
+    // console.log('expired?', accessTokenExpDate <= nowTime);
 
     return accessTokenExpDate <= nowTime;
   }
@@ -237,31 +240,33 @@ async function getFingerprint() {
   const fp = await fpPromise();
   const result = await fp.get();
 
-  const {
-    plugins,
-    localStorage,
-    adBlock,
-    screenResolution,
-    availableScreenResolution,
-    enumerateDevices,
-    pixelRatio,
-    doNotTrack,
-    ...components
-  } = result.components;
+  // const {
+  //   plugins,
+  //   localStorage,
+  //   adBlock,
+  //   screenResolution,
+  //   availableScreenResolution,
+  //   enumerateDevices,
+  //   pixelRatio,
+  //   doNotTrack,
+  //   ...components
+  // } = result.components;
 
   if (result && result.visitorId) {
-    return hashComponents([result.visitorId, components].join(''));
+    // return hashComponents([result.visitorId, components].join(''));
+    return hashComponents(result.visitorId);
   }
 }
 
 function resetAuthData({ isError = false, message = '' }) {
-  console.log('isError', isError, message);
+  // console.log('isError', isError, message);
   const { dispatch } = store;
   dispatch(
     setCurrentUser({
       id: null,
       username: '',
       email: '',
+      isOnline: false,
     }),
   );
   dispatch(
@@ -272,6 +277,12 @@ function resetAuthData({ isError = false, message = '' }) {
       sessionError: isError ? true : false,
     }),
   );
+  dispatch(
+    setChatList({
+      conversations: [],
+    }),
+  );
+  dispatch(setActiveChat({}));
 
   AuthService.setRefreshToken('');
   AuthService.setBearer('');

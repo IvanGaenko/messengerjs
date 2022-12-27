@@ -132,11 +132,11 @@ export default (state = chatInitialState, action) => {
       };
 
     case EDIT_MESSAGE:
-      const newOldMessages = state.rooms.map(r => {
+      const newOldMessages = state.rooms.map((r) => {
         if (r.chatId === action.chatId) {
           return {
             ...r,
-            oldMessages: r.oldMessages.map(m => {
+            oldMessages: r.oldMessages.map((m) => {
               if (m.id === action.editedMessage.messageId) {
                 return { ...m, message: action.editedMessage.message };
               }
@@ -149,7 +149,7 @@ export default (state = chatInitialState, action) => {
 
       const newRoomOldMessages = state.room;
       if (state.room.length !== 0 && state.room.oldMessages !== undefined) {
-        newRoomOldMessages.oldMessages = state.room.oldMessages.map(r => {
+        newRoomOldMessages.oldMessages = state.room.oldMessages.map((r) => {
           if (r.id === action.editedMessage.messageId) {
             return { ...r, message: action.editedMessage.message };
           }
@@ -163,7 +163,7 @@ export default (state = chatInitialState, action) => {
         ...state,
         rooms: state.rooms.length === 0 ? state.rooms : newOldMessages,
         room: newRoomOldMessages,
-        messages: state.messages.map(m => {
+        messages: state.messages.map((m) => {
           if (m.id === action.editedMessage.messageId) {
             return { ...m, message: action.editedMessage.message };
           }
@@ -172,12 +172,12 @@ export default (state = chatInitialState, action) => {
       };
 
     case DELETE_MESSAGE:
-      const deleteOldMessages = state.rooms.map(r => {
+      const deleteOldMessages = state.rooms.map((r) => {
         if (r.chatId === action.chatId) {
           return {
             ...r,
             oldMessages: r.oldMessages.filter(
-              m => m.id !== action.deletedMessage.messageId,
+              (m) => m.id !== action.deletedMessage.messageId,
             ),
           };
         }
@@ -187,7 +187,7 @@ export default (state = chatInitialState, action) => {
       const deleteRoomOldMessages = state.room;
       if (state.room.length !== 0 && state.room.oldMessages !== undefined) {
         deleteRoomOldMessages.oldMessages = state.room.oldMessages.filter(
-          m => m.id !== action.deletedMessage.messageId,
+          (m) => m.id !== action.deletedMessage.messageId,
         );
       } else {
         deleteRoomOldMessages.oldMessages = [];
@@ -197,7 +197,7 @@ export default (state = chatInitialState, action) => {
         rooms: state.rooms.length === 0 ? state.rooms : deleteOldMessages,
         room: deleteRoomOldMessages,
         messages: state.messages.filter(
-          m => m.id !== action.deletedMessage.messageId,
+          (m) => m.id !== action.deletedMessage.messageId,
         ),
       };
 

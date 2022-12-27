@@ -20,14 +20,14 @@ import { getMessageLimit } from '../../setup/utils';
 const Chat = ({ classes }) => {
   // state
   const [initialized, setInitialized] = useState(false);
-  const { rooms, isLoading } = useSelector(state => state.chat);
-  const { details } = useSelector(state => state.auth);
+  const { rooms, isLoading } = useSelector((state) => state.chat);
+  const { details } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
   // get Rooms
   const getRooms = async () => {
-    console.log('getRooms');
+    // console.log('getRooms');
     dispatch(getChatRooms(details.id, details.friendList, getMessageLimit));
     setInitialized(true);
   };
@@ -38,12 +38,12 @@ const Chat = ({ classes }) => {
     }
 
     io.on('unread', async () => {
-      console.log('hey! new messages!');
+      // console.log('hey! new messages!');
       await getRooms();
     });
 
     io.on('updateMessage', async () => {
-      console.log('hey! update messages!');
+      // console.log('hey! update messages!');
       await getRooms();
     });
 

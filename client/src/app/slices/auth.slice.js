@@ -22,7 +22,7 @@ const authSlice = createSlice({
       state.accessTokenExpDate = accessTokenExpDate || null;
       state.message = message;
       state.sessionError = sessionError;
-      console.log('action.payload', action.payload);
+      // console.log('action.payload', action.payload);
     },
   },
 });

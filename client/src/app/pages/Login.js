@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useSelector, useDispatch } from 'react-redux';
@@ -6,21 +5,11 @@ import { useNavigate } from 'react-router-dom';
 
 import AuthService from '../services/auth.service';
 import { getCurrent } from '../slices/user.slice';
-import { socket } from '../socket';
 
 const Login = () => {
-  const { accessToken, message } = useSelector((state) => state.auth);
+  const { message } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    socket.on('error', (err) => {
-      console.log('connect_error', err);
-    });
-    return () => {
-      socket.off('error');
-    };
-  });
 
   const schema = Yup.object().shape({
     email: Yup.string().email().required('Email is a required field'),
@@ -46,10 +35,8 @@ const Login = () => {
 
     dispatch(getCurrent())
       .unwrap()
+      .catch((err) => console.log('data', err))
       .then((data) => {
-        // console.log('login token', socket.auth);
-        // socket.auth.token = accessToken;
-        // socket.connect();
         navigate(`/${data.username}`);
       });
   };
@@ -75,7 +62,7 @@ const Login = () => {
         type="password"
         value={formik.values.password}
         onChange={formik.handleChange}
-        placeholder="Enter passwrod"
+        placeholder="Enter password"
       />
       {formik.touched.password && formik.errors.password ? (
         <div>{formik.errors.password}</div>

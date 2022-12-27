@@ -7,13 +7,13 @@ import routes from '../setup/routes';
 import UnreadMessageCount from './UnreadMessageCount';
 
 // Component
-const FriendMessagePanel = props => {
+const FriendMessagePanel = (props) => {
   // State
   const { rooms } = props;
 
   return (
     <div>
-      {rooms.map(room => {
+      {rooms.map((room) => {
         return (
           <div key={room.id} style={{ padding: '10px' }}>
             <Link

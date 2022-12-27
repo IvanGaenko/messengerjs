@@ -24,11 +24,11 @@ const Signup = ({ history, classes }) => {
     password: '',
     passwordRepeat: '',
   });
-  const { isLoading } = useSelector(state => state.auth);
+  const { isLoading } = useSelector((state) => state.auth);
   const [passwordError, setPasswordError] = useState('');
 
   // on signup
-  const onSignup = async event => {
+  const onSignup = async (event) => {
     event.preventDefault();
 
     try {
@@ -45,8 +45,8 @@ const Signup = ({ history, classes }) => {
   };
 
   // on change
-  const onChange = event => {
-    console.log('event.target.value', event.target.name);
+  const onChange = (event) => {
+    // console.log('event.target.value', event.target.name);
     setUser({
       ...user,
       [event.target.name]: event.target.value,

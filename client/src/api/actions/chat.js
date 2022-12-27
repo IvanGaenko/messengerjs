@@ -23,7 +23,7 @@ import { CHAT_LIST_CACHE, CHAT_ROOM_CACHE, MESSAGE_CACHE } from './cache-keys';
 
 // Actions
 export function getChatRooms(detail, friendList, limit, isLoading = true) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       const chatList = JSON.parse(window.localStorage.getItem(CHAT_LIST_CACHE));
 
@@ -52,11 +52,11 @@ export function getChatRooms(detail, friendList, limit, isLoading = true) {
       });
 
       let error = data.message;
-      console.log('getAllChatRooms', data);
+      // console.log('getAllChatRooms', data);
 
       if (data.success) {
         const chatList = data.data;
-        console.log('-----chatList', chatList);
+        // console.log('-----chatList', chatList);
 
         dispatch({
           type: GET_CHAT_LIST,
@@ -71,7 +71,7 @@ export function getChatRooms(detail, friendList, limit, isLoading = true) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       dispatch({
         type: GET_CHAT_LIST_RESPONSE,
@@ -82,18 +82,18 @@ export function getChatRooms(detail, friendList, limit, isLoading = true) {
 }
 
 export function getRoom(detail, id, limit, isRoomLoading = true) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       const cachedChatRoom = JSON.parse(
         window.localStorage.getItem(CHAT_ROOM_CACHE),
       );
-      console.log('cachedChatRoom', cachedChatRoom);
-      console.log(
-        'cachedChatRoom.id === id',
-        cachedChatRoom.id,
-        parseInt(id),
-        cachedChatRoom.id === parseInt(id),
-      );
+      // console.log('cachedChatRoom', cachedChatRoom);
+      // console.log(
+      // 'cachedChatRoom.id === id',
+      // cachedChatRoom.id,
+      // parseInt(id),
+      // cachedChatRoom.id === parseInt(id),
+      // );
 
       if (cachedChatRoom && cachedChatRoom.id === parseInt(id)) {
         dispatch({
@@ -107,7 +107,7 @@ export function getRoom(detail, id, limit, isRoomLoading = true) {
         });
 
         socketEmit('join', cachedChatRoom.chatId);
-        console.log('!!!!!!!!!!!!!!!!getExistRoom');
+        // console.log('!!!!!!!!!!!!!!!!getExistRoom');
       } else {
         dispatch({
           type: GET_ROOM_REQUEST,
@@ -128,7 +128,7 @@ export function getRoom(detail, id, limit, isRoomLoading = true) {
       });
 
       let error = data.message;
-      console.log('-----------------getRoom', data);
+      // console.log('-----------------getRoom', data);
 
       if (data.success) {
         const chatRoom = data.data[0];
@@ -141,7 +141,7 @@ export function getRoom(detail, id, limit, isRoomLoading = true) {
           type: SET_CONNECTION,
           connectionData: chatRoom.chatId,
         });
-        console.log('chatRoom to cache', chatRoom);
+        // console.log('chatRoom to cache', chatRoom);
 
         window.localStorage.setItem(CHAT_ROOM_CACHE, JSON.stringify(chatRoom));
         socketEmit('join', chatRoom.chatId);
@@ -152,7 +152,7 @@ export function getRoom(detail, id, limit, isRoomLoading = true) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       dispatch({
         type: GET_ROOM_RESPONSE,
@@ -163,7 +163,7 @@ export function getRoom(detail, id, limit, isRoomLoading = true) {
 }
 
 export function getChatRoomMessage(detail, id, limit, isMessageLoading = true) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       const cachedMessages = JSON.parse(
         window.localStorage.getItem(MESSAGE_CACHE),
@@ -198,7 +198,7 @@ export function getChatRoomMessage(detail, id, limit, isMessageLoading = true) {
       });
 
       let error = data.message;
-      console.log('getMessage', data);
+      // console.log('getMessage', data);
 
       if (data.success) {
         const chatMessage = data.data;
@@ -215,7 +215,7 @@ export function getChatRoomMessage(detail, id, limit, isMessageLoading = true) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       dispatch({
         type: GET_MESSAGES_RESPONSE,
@@ -226,7 +226,7 @@ export function getChatRoomMessage(detail, id, limit, isMessageLoading = true) {
 }
 
 export function getNewChatMessages(data) {
-  return async dispatch => {
+  return async (dispatch) => {
     const cachedChatRoom = JSON.parse(
       window.localStorage.getItem(MESSAGE_CACHE),
     );
@@ -251,7 +251,7 @@ export function getNewChatMessages(data) {
 }
 
 export function clearRawMessages(detail, id, name) {
-  return async dispatch => {
+  return async (dispatch) => {
     // const cachedChatRoom = JSON.parse(
     //   window.localStorage.getItem(CHAT_ROOM_CACHE),
     // );
@@ -262,7 +262,7 @@ export function clearRawMessages(detail, id, name) {
         params: { detail, id, name },
       });
 
-      console.log('clearRawMessages data', data);
+      // console.log('clearRawMessages data', data);
 
       if (data.success) {
         const chatRoom = data.data;
@@ -283,7 +283,7 @@ export function clearRawMessages(detail, id, name) {
         // }
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 }

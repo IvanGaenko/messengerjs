@@ -17,15 +17,15 @@ import Section from '../../modules/Section';
 // Component
 const Profile = ({ classes }) => {
   // state
-  const { details } = useSelector(state => state.auth);
+  const { details } = useSelector((state) => state.auth);
   const [searchId, setSearchId] = useState('');
   const dispatch = useDispatch();
 
-  const onChange = event => {
+  const onChange = (event) => {
     setSearchId(event.target.value);
   };
 
-  const onSend = event => {
+  const onSend = (event) => {
     event.preventDefault();
     // dispatch(addFriend(searchId, details.friendList, details.id));
     setSearchId('');

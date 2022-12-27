@@ -4,7 +4,7 @@ import { comparePassword } from '../lib/passwordOp';
 
 const loginAuth = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log('email, password', email, password);
+  // console.log('email, password', email, password);
   const user = await findUser(email);
 
   if (!user) {

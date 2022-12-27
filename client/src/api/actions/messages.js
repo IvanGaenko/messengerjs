@@ -11,7 +11,7 @@ import {
 import { CHAT_LIST_CACHE, CHAT_ROOM_CACHE, MESSAGE_CACHE } from './cache-keys';
 
 export function editChatMessages(messageId, author, message, chatId) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       const { data } = await axios.post(API_URL, {
         operation: 'editChatMessage',
@@ -26,13 +26,13 @@ export function editChatMessages(messageId, author, message, chatId) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 }
 
 export function deleteChatMessage(messageId, author, chatId) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       const { data } = await axios.post(API_URL, {
         operation: 'deleteChatMessage',
@@ -47,16 +47,16 @@ export function deleteChatMessage(messageId, author, chatId) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 }
 
 export function updateClientMessages(data) {
-  console.log('updateClientMessages data', data);
-  return async dispatch => {
+  // console.log('updateClientMessages data', data);
+  return async (dispatch) => {
     if (data.status === 'update') {
-      console.log('yo');
+      // console.log('yo');
       editMessageInCache(data);
 
       dispatch({
@@ -76,13 +76,13 @@ export function updateClientMessages(data) {
 }
 
 export function getMoreMessages(detail, id, limit) {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       const { data } = await axios.post(API_URL, {
         operation: 'getMessage',
         params: { detail, id, limit },
       });
-      console.log('getMoreMessages', data);
+      // console.log('getMoreMessages', data);
 
       if (data.success) {
         dispatch({
@@ -91,18 +91,18 @@ export function getMoreMessages(detail, id, limit) {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 }
 
 export function editMessageInCache(data) {
   const chatList = JSON.parse(window.localStorage.getItem(CHAT_LIST_CACHE));
-  const newOldMessages = chatList.map(r => {
+  const newOldMessages = chatList.map((r) => {
     if (r.chatId === data.chatId) {
       return {
         ...r,
-        oldMessages: r.oldMessages.map(m => {
+        oldMessages: r.oldMessages.map((m) => {
           if (m.id === data.messageId) {
             return { ...m, message: data.message };
           }
@@ -119,7 +119,7 @@ export function editMessageInCache(data) {
 
   const newRoomOldMessages = cachedChatRoom;
   if (cachedChatRoom.length !== 0 && cachedChatRoom.oldMessages !== undefined) {
-    newRoomOldMessages.oldMessages = cachedChatRoom.oldMessages.map(r => {
+    newRoomOldMessages.oldMessages = cachedChatRoom.oldMessages.map((r) => {
       if (r.id === data.messageId) {
         return { ...r, message: data.message };
       }
@@ -133,7 +133,7 @@ export function editMessageInCache(data) {
 
   const chatListToCache = chatList.length === 0 ? chatList : newOldMessages;
   const chatRoomToCache = newRoomOldMessages;
-  const messageToCache = cachedMessages.map(m => {
+  const messageToCache = cachedMessages.map((m) => {
     if (m.id === data.messageId) {
       return { ...m, message: data.message };
     }
@@ -148,11 +148,11 @@ export function editMessageInCache(data) {
 export function deleteMessageInCache(data) {
   // delete oldMessages in chatList
   const chatList = JSON.parse(window.localStorage.getItem(CHAT_LIST_CACHE));
-  const deleteOldMessages = chatList.map(r => {
+  const deleteOldMessages = chatList.map((r) => {
     if (r.chatId === data.chatId) {
       return {
         ...r,
-        oldMessages: r.oldMessages.filter(m => m.id !== data.messageId),
+        oldMessages: r.oldMessages.filter((m) => m.id !== data.messageId),
       };
     }
     return r;
@@ -168,9 +168,8 @@ export function deleteMessageInCache(data) {
     deleteRoomOldMessages.length !== 0 &&
     deleteRoomOldMessages.oldMessages !== undefined
   ) {
-    deleteRoomOldMessages.oldMessages = deleteRoomOldMessages.oldMessages.filter(
-      m => m.id !== data.messageId,
-    );
+    deleteRoomOldMessages.oldMessages =
+      deleteRoomOldMessages.oldMessages.filter((m) => m.id !== data.messageId);
   } else {
     deleteRoomOldMessages.oldMessages = [];
   }
@@ -178,7 +177,7 @@ export function deleteMessageInCache(data) {
   // delete oldMessages in message
   const cachedMessages = JSON.parse(window.localStorage.getItem(MESSAGE_CACHE));
   const deleteMessageOldMessages = cachedMessages.filter(
-    m => m.id !== data.messageId,
+    (m) => m.id !== data.messageId,
   );
 
   const chatListToCache =

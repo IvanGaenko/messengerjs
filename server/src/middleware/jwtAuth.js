@@ -5,7 +5,7 @@ import { findUser } from '../services/account.service';
 
 export const jwtAuth = async (req, res, next) => {
   const headerToken = req.headers.authorization;
-  console.log('jwtAuth headerToken', headerToken);
+  // console.log('jwtAuth headerToken', headerToken);
 
   if (!headerToken) {
     // return next(new GlobalError('You are not logged in', 401));

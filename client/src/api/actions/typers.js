@@ -4,7 +4,7 @@ import { START_TYPING, STOP_TYPING } from '../types/typingTypes';
 // Actions
 
 export function startTyping(data) {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: START_TYPING,
       typingStatus: true,
@@ -14,7 +14,7 @@ export function startTyping(data) {
 }
 
 export function stopTyping(data) {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: STOP_TYPING,
       typingStatus: false,
