@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "cd server && npm run start",
-    "client": "cd client && npm run start"
+    "redis": "redis-server",
+    "client": "wt --window 0 -p pwsh -d . pwsh -noExit -Command \"cd client && yarn start\"",
+    "server": "wt --window 0 -p pwsh -d . pwsh -noExit -Command \"cd server && npm start\"",
+    "dev2": "concurrently \"yarn redis\" \"yarn client\" \"yarn server\""
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/IvanGaenko/messengerjs/issues"
   },
-  "homepage": "https://github.com/IvanGaenko/messengerjs#readme"
+  "homepage": "https://github.com/IvanGaenko/messengerjs#readme",
+  "dependencies": {
+    "concurrently": "^7.6.0"
+  }
 }

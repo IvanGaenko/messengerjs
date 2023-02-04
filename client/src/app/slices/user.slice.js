@@ -27,11 +27,13 @@ const userSlice = createSlice({
       state.username = action.payload.username ?? state.username;
       state.email = action.payload.email ?? state.email;
       state.isOnline = action.payload.isOnline ?? state.isOnline;
+      // console.log('state.id', state.id);
     },
   },
   extraReducers: (builder) => {
     builder.addCase(getCurrent.fulfilled, (state, action) => {
       const { id, username, email } = action.payload;
+      // console.log('action.payload', action.payload);
       state.id = id;
       state.username = username;
       state.email = email;

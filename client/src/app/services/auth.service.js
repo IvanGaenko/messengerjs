@@ -277,12 +277,8 @@ function resetAuthData({ isError = false, message = '' }) {
       sessionError: isError ? true : false,
     }),
   );
-  dispatch(
-    setChatList({
-      conversations: [],
-    }),
-  );
-  dispatch(setActiveChat({}));
+  dispatch(setChatList({}));
+  dispatch(setActiveChat(null));
 
   AuthService.setRefreshToken('');
   AuthService.setBearer('');

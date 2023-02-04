@@ -13,6 +13,7 @@ import {
   findByRefreshToken,
   removeRefreshSession,
 } from '../services/refreshSession.service';
+// import { getMessages } from '../services/message.service';
 import { addRefreshSession } from '../lib/addRefreshSession';
 import { makeAccessToken } from '../lib/makeAccessToken';
 // import { seed } from '../models/seed';
@@ -145,6 +146,8 @@ export const logoutController = async (req, res) => {
 };
 
 export const refreshTokensController = async (req, res) => {
+  // const x = await getMessages([1]);
+  // console.log('x', x);
   // console.log('hello');
   const reqRefreshToken = req.signedCookies.__rt || req.cookies.__rt;
   // req.cookies.__rt || req.body.__rt || req.signedCookies.__rt;

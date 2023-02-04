@@ -1,55 +1,58 @@
 function addAssociations(db) {
   const { user, refreshSession, conversation, userToConversation, message } =
     db;
-
-  user.hasMany(refreshSession, { as: 'refreshSession' });
+  // user - refreshSession
+  user.hasMany(refreshSession, { as: 'refreshSessions', foreignKey: 'userId' });
   refreshSession.belongsTo(user, {
     foreignKey: 'userId',
     as: 'user',
   });
 
-  // user.belongsToMany(conversation, {
-  //   through: userToConversation,
-  //   as: 'users',
-  //   foreignKey: 'userId',
-  // });
+  // user - conversation
+  user.belongsToMany(conversation, {
+    through: userToConversation,
+    as: 'conversations',
+  });
+  conversation.belongsToMany(user, { through: userToConversation, as: 'user' });
 
-  // conversation.belongsToMany(user, {
-  //   through: userToConversation,
-  //   as: 'conversations',
-  //   foreignKey: 'conversationId',
-  // });
-
-  user.belongsToMany(conversation, { through: userToConversation });
-  conversation.belongsToMany(user, { through: userToConversation });
-
+  // user - message
   user.hasMany(message, {
+    foreignKey: 'userId',
     as: 'messages',
   });
+
   message.belongsTo(user, {
     foreignKey: 'userId',
     as: 'user',
   });
 
+  // conversation - messages
   conversation.hasMany(message, {
+    foreignKey: 'conversationId',
     as: 'messages',
   });
-  message.belongsTo(conversation, {
+
+  conversation.hasMany(message, {
     foreignKey: 'conversationId',
-    as: 'conversation',
+    as: 'unreadedMessages',
   });
 
-  // user.hasMany(userToConversation);
-  // userToConversation.belongsTo(user);
-
-  // conversation.hasMany(userToConversation);
-  // userToConversation.belongsTo(conversation);
-
-  // conversation.hasMany(message);
-  // message.belongsTo(conversation);
-
-  // user.hasMany(message);
-  // message.belongsTo(user);
+  message.belongsTo(conversation, {
+    foreignKey: 'conversationId',
+    as: 'conversations',
+  });
 }
 
 module.exports = { addAssociations };
+
+// user.hasMany(userToConversation);
+// userToConversation.belongsTo(user);
+
+// conversation.hasMany(userToConversation);
+// userToConversation.belongsTo(conversation);
+
+// conversation.hasMany(message);
+// message.belongsTo(conversation);
+
+// user.hasMany(message);
+// message.belongsTo(user);

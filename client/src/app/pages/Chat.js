@@ -6,13 +6,14 @@ import { setActiveChat } from '../slices/chat.slice';
 
 import ChatBar from '../components/ChatBar';
 import ChatBody from '../components/ChatBody';
-// import ChatFooter from '../components/ChatFooter';
+import ChatProfile from '../components/ChatProfile';
 
 const Chat = () => {
   const { chatList, activeChat } = useSelector((state) => state.chat);
-  const { id, username } = useSelector((state) => state.user);
+  const { isOpenFriendProfile } = useSelector((state) => state.handler);
   const dispatch = useDispatch();
-  console.log('render chat', chatList);
+
+  console.log('render chatList', chatList);
 
   useEffect(() => {
     socket.on('res', (data) => console.log('user', data));
@@ -22,35 +23,31 @@ const Chat = () => {
     };
   }, []);
 
-  const click = () => {
-    socket.emit('click', 'hello');
-  };
-
   const handleClick = (chat) => {
     dispatch(setActiveChat(chat));
   };
 
   return (
     <>
-      {/* <p>Im {chatList.isOnline ? 'online' : 'offline'}</p> */}
-      <p>Chat</p>
-
-      {chatList.id && (
-        <div>
-          <ChatBar
-            conversations={chatList.conversations}
-            handleClick={handleClick}
-          />
-          <ChatBody
-            activeChat={activeChat}
-            handleClick={handleClick}
-            id={id}
-            username={username}
-          />
-        </div>
-      )}
-
-      <button onClick={click}>Click</button>
+      <ChatBar
+        conversations={chatList.conversations}
+        handleClick={handleClick}
+      />
+      <ChatBody handleClick={handleClick} />
+      <div
+        className={`!flex flex-col w-[421px] absolute right-0 z-[3] h-full min-h-full max-h-full bg-[#181818] transform-gpu translate-x-[420px] translate-y-0`}
+        style={{
+          borderLeft: '1px solid #0f0f0f',
+          overflow: 'initial',
+          gridColumnStart: 1,
+          boxShadow: '0 0.25rem 0.5rem 0.1rem rgb(0 0 0 / 20%)',
+          transform: isOpenFriendProfile
+            ? 'translateZ(0)'
+            : 'translate3d(420px,0,0)',
+        }}
+      >
+        {activeChat && <ChatProfile />}
+      </div>
     </>
   );
 };

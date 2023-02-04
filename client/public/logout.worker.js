@@ -17,5 +17,5 @@ const enableTimeout = () => {
   frequency = setTimeout(() => {
     console.log('logout procced');
     postMessage('logout');
-  }, 60 * 1000);
+  }, 60 * 5 * 1000);
 };

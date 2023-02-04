@@ -58,9 +58,9 @@ export function timeAgo(dateParam) {
   } else if (minutes < 60) {
     return `${minutes} minutes ago`;
   } else if (isToday) {
-    return getFormattedDate(date, 'Today');
+    return getFormattedDate(date, 'today');
   } else if (isYesterday) {
-    return getFormattedDate(date, 'Yesterday');
+    return getFormattedDate(date, 'yesterday');
   }
 
   return `${days} days ago`;

@@ -22,7 +22,7 @@ export const updateUser = async (id, payload) =>
       where: {
         id,
       },
-    },
+    }
   );
 
 export const findByPk = async (id) => await db.user.findByPk(id);

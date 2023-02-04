@@ -1,12 +1,22 @@
 import { Server } from 'socket.io';
-import { createClient } from 'redis';
+// import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { Op } from 'sequelize';
 
+import { client } from '../redisClient';
 import { corsWhitelist } from '../config/env';
 import { setupWorker } from '@socket.io/sticky';
+// import RedisSessionStore from '../services/sessionStore.servise';
 import socketAuth from '../middleware/socketAuth';
 import { updateUser } from '../services/account.service';
+// import { addMessage, getUnreadMessages } from '../services/message.service';
+import {
+  addMessage,
+  updateMessage,
+  searchMessages,
+  getMessages,
+} from '../services/message.service';
+import { updateConversation } from '../services/conversation.service';
 import db from '../models';
 
 export default async (server) => {
@@ -27,7 +37,7 @@ export default async (server) => {
     },
   });
 
-  const client = createClient({ host: 'localhost', port: 6379 });
+  // const client = createClient({ host: 'localhost', port: 6379 });
   const subscriber = client.duplicate();
 
   client.on('error', (err) => console.log('Redis Client Error', err));
@@ -51,6 +61,7 @@ export default async (server) => {
     if (!users[socket.user.id]) {
       users[socket.user.id] = {
         friendsId: new Set(),
+        conversations: new Set(),
         clients: [],
         isOnline: false,
         reloadPageTimeout: null,
@@ -71,10 +82,12 @@ export default async (server) => {
       include: [
         {
           model: db.conversation,
-          attributes: ['id', 'name'],
+          as: 'conversations',
+          attributes: ['id', 'lastUpdated'],
           include: [
             {
               model: db.user,
+              as: 'user',
               where: {
                 id: {
                   [Op.ne]: socket.user.id,
@@ -91,21 +104,71 @@ export default async (server) => {
             {
               model: db.message,
               as: 'messages',
+              // offset: 0,
+              // limit: 20,
+              separate: true,
+              order: [['id', 'ASC']],
+            },
+            {
+              required: false,
+              // attributes: ['content'],
+              model: db.message,
+              as: 'unreadedMessages',
+              where: {
+                haveSeen: false,
+                userId: {
+                  [Op.ne]: socket.user.id,
+                },
+              },
             },
           ],
         },
       ],
       order: [
-        [db.conversation, { model: db.message, as: 'messages' }, 'id', 'asc'],
+        [
+          { model: db.conversation, as: 'conversations' },
+          'lastUpdated',
+          'desc',
+        ],
       ],
     });
 
     for (const friend of chatUsers.conversations) {
-      users[socket.user.id].friendsId.add(friend.users[0].id);
+      users[socket.user.id].friendsId.add(friend.user[0].id);
+      users[socket.user.id].conversations.add(friend.id);
     }
 
+    const chatUsersWithUnreadMessages = chatUsers.toJSON();
+
+    chatUsersWithUnreadMessages.conversations =
+      chatUsersWithUnreadMessages.conversations.map((chat, i) => {
+        if (i === 0) {
+          chatUsersWithUnreadMessages.totalUnreadedMessagesCount = 0;
+        }
+        let unreadedMessagesCount = 0;
+        console.log(
+          'chat.unreadedMessages.length',
+          chat.unreadedMessages.length
+        );
+        if (
+          chat.unreadedMessages !== undefined &&
+          chat.unreadedMessages.length > 0
+        ) {
+          unreadedMessagesCount = chat.unreadedMessages.length;
+          chatUsersWithUnreadMessages.totalUnreadedMessagesCount +=
+            unreadedMessagesCount;
+          // console.log('chat.unreadedMessages', chat.unreadedMessages);
+        }
+        delete chat.unreadedMessages;
+        return {
+          ...chat,
+          unreadedMessagesCount,
+          isTyping: false,
+        };
+      });
+
     for (const p of users[socket.user.id].clients) {
-      io.to(p).emit('chatUsers', chatUsers);
+      io.to(p).emit('chatUsers', chatUsersWithUnreadMessages);
     }
 
     if (!users[socket.user.id].isOnline) {
@@ -126,6 +189,68 @@ export default async (server) => {
     }
 
     console.log('users after init', users);
+    console.log('date', new Date(1674319425).toLocaleTimeString());
+
+    const x = await getMessages(
+      Array.from(users[socket.user.id].conversations)
+    );
+
+    const y = x.map((m) => m.toJSON());
+
+    console.log('y', y);
+    console.log(
+      'new Date(new Date() - 24 * 60 * 60 * 1000)',
+      new Date(new Date() - 24 * 60 * 60 * 1000)
+    );
+
+    socket.on('clientResponse', async (data) => {
+      console.log('data', data);
+      const message = await addMessage(data);
+      const conversation = await updateConversation(data.conversationId, {
+        lastUpdated: new Date(),
+      });
+      console.log('conv', conversation);
+      console.log('message', message);
+
+      const pageUsers = users[socket.user.id].clients;
+      for (const p of pageUsers) {
+        io.to(p).emit('message', {
+          message,
+          lastUpdated: conversation[1][0].lastUpdated,
+        });
+      }
+
+      if (users[data.friendId]) {
+        io.to(users[data.friendId].clients).emit('message', {
+          message,
+          lastUpdated: conversation[1][0].lastUpdated,
+        });
+      }
+    });
+
+    socket.on('readReceiptResponse', async (data) => {
+      console.log('message have seen', data);
+      const messages = await updateMessage(data.readReceiptIds, {
+        haveSeen: true,
+      });
+      console.log('messages', messages);
+
+      const pageUsers = users[socket.user.id].clients;
+      for (const p of pageUsers) {
+        io.to(p).emit('notify-read-rcpt', data);
+      }
+
+      if (users[data.friendId]) {
+        io.to(users[data.friendId].clients).emit('notify-read-rcpt', data);
+      }
+    });
+
+    socket.on('onTyping', (data) => {
+      console.log('user is typing', data);
+      if (users[data.friendId]) {
+        io.to(users[data.friendId].clients).emit('typingResponse', data);
+      }
+    });
 
     socket.on('onRefreshActivity', async () => {
       const pageUsers = users[socket.user.id].clients;
@@ -184,6 +309,34 @@ export default async (server) => {
       console.log('users after admin offline', users);
     });
 
+    socket.on('changeUserProfileData', async (data) => {
+      await updateUser(socket.user.id, data);
+
+      for (const p of users[socket.user.id].clients) {
+        io.to(p).emit('update user data', data);
+      }
+
+      for (const friend of users[socket.user.id].friendsId) {
+        if (users[friend]) {
+          io.to(friend).emit('updateFriendData', {
+            id: socket.user.id,
+            ...data,
+          });
+        }
+      }
+    });
+
+    socket.on('searchMessages', async (data) => {
+      const messages = await searchMessages(
+        Array.from(users[socket.user.id].conversations),
+        data
+      );
+
+      for (const p of users[socket.user.id].clients) {
+        io.to(p).emit('responseSearchMessages', messages);
+      }
+    });
+
     socket.on('disconnect', async () => {
       console.log('🔥: Chat disconnected', socket.id);
 
@@ -193,6 +346,7 @@ export default async (server) => {
 
       if (users[socket.user.id].clients.length === 0) {
         const lastActivity = new Date().toISOString();
+
         users[socket.user.id].reloadPageTimeout = setTimeout(async () => {
           await updateUser(socket.user.id, {
             isOnline: false,
@@ -235,7 +389,7 @@ export default async (server) => {
       const sockets = await io.in(socket.user.id).fetchSockets();
       console.log('sockets', sockets.length);
       console.log('click', data);
-      socket.emit('res', data);
+      // socket.emit('res', unreadedMessages);
     });
   };
 

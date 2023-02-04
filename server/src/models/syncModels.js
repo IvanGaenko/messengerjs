@@ -8,6 +8,7 @@ const syncModels = async (db) => {
     // await User.sync({ force: true });
     await conversation.sync();
     await userToConversation.sync();
+    // await message.sync({ force: true });
     await message.sync();
     console.log(
       `Models ${user.name}, ${refreshSession.name} have been synced.`
