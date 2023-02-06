@@ -14,7 +14,7 @@ import {
   addMessage,
   updateMessage,
   searchMessages,
-  getMessages,
+  // getMessages,
 } from '../services/message.service';
 import { updateConversation } from '../services/conversation.service';
 import db from '../models';
@@ -102,25 +102,50 @@ export default async (server) => {
               ],
             },
             {
-              model: db.message,
-              as: 'messages',
-              // offset: 0,
-              // limit: 20,
-              separate: true,
-              order: [['id', 'ASC']],
-            },
-            {
-              required: false,
-              // attributes: ['content'],
-              model: db.message,
-              as: 'unreadedMessages',
-              where: {
-                haveSeen: false,
-                userId: {
-                  [Op.ne]: socket.user.id,
+              model: db.messageByDay,
+              as: 'messageByDay',
+              limit: 3,
+              order: [['id', 'DESC']],
+              include: [
+                {
+                  model: db.message,
+                  as: 'messages',
+                  separate: true,
+                  order: [['id', 'ASC']],
                 },
-              },
+                {
+                  required: false,
+                  model: db.message,
+                  as: 'unreadedMessages',
+                  where: {
+                    haveSeen: false,
+                    userId: {
+                      [Op.ne]: socket.user.id,
+                    },
+                  },
+                },
+              ],
             },
+            // {
+            //   model: db.message,
+            //   as: 'messages',
+            //   // offset: 0,
+            //   // limit: 20,
+            //   separate: true,
+            //   order: [['id', 'ASC']],
+            // },
+            // {
+            //   required: false,
+            //   // attributes: ['content'],
+            //   model: db.message,
+            //   as: 'unreadedMessages',
+            //   where: {
+            //     haveSeen: false,
+            //     userId: {
+            //       [Op.ne]: socket.user.id,
+            //     },
+            //   },
+            // },
           ],
         },
       ],
@@ -140,26 +165,31 @@ export default async (server) => {
 
     const chatUsersWithUnreadMessages = chatUsers.toJSON();
 
+    // console.log(
+    //   'chatUsersWithUnreadMessages',
+    //   chatUsersWithUnreadMessages.conversations[0].messageByDay
+    // );
+
     chatUsersWithUnreadMessages.conversations =
-      chatUsersWithUnreadMessages.conversations.map((chat, i) => {
-        if (i === 0) {
-          chatUsersWithUnreadMessages.totalUnreadedMessagesCount = 0;
-        }
+      chatUsersWithUnreadMessages.conversations.map((chat) => {
         let unreadedMessagesCount = 0;
-        console.log(
-          'chat.unreadedMessages.length',
-          chat.unreadedMessages.length
-        );
-        if (
-          chat.unreadedMessages !== undefined &&
-          chat.unreadedMessages.length > 0
-        ) {
-          unreadedMessagesCount = chat.unreadedMessages.length;
-          chatUsersWithUnreadMessages.totalUnreadedMessagesCount +=
-            unreadedMessagesCount;
-          // console.log('chat.unreadedMessages', chat.unreadedMessages);
+
+        console.log('chat.messageByDay.length', chat.messageByDay.length);
+
+        if (chat.messageByDay !== undefined && chat.messageByDay.length > 0) {
+          chat.messageByDay = chat.messageByDay.reverse();
+          for (let y = 0; y < chat.messageByDay.length; y++) {
+            const messageByDay = chat.messageByDay[y];
+
+            if (
+              messageByDay.unreadedMessages !== undefined &&
+              messageByDay.unreadedMessages.length > 0
+            ) {
+              unreadedMessagesCount += messageByDay.unreadedMessages.length;
+            }
+            delete messageByDay.unreadedMessages;
+          }
         }
-        delete chat.unreadedMessages;
         return {
           ...chat,
           unreadedMessagesCount,
@@ -191,13 +221,13 @@ export default async (server) => {
     console.log('users after init', users);
     console.log('date', new Date(1674319425).toLocaleTimeString());
 
-    const x = await getMessages(
-      Array.from(users[socket.user.id].conversations)
-    );
+    // const x = await getMessages(
+    //   Array.from(users[socket.user.id].conversations)
+    // );
 
-    const y = x.map((m) => m.toJSON());
+    // const y = x.map((m) => m.toJSON());
 
-    console.log('y', y);
+    // console.log('y', y);
     console.log(
       'new Date(new Date() - 24 * 60 * 60 * 1000)',
       new Date(new Date() - 24 * 60 * 60 * 1000)
@@ -209,28 +239,36 @@ export default async (server) => {
       const conversation = await updateConversation(data.conversationId, {
         lastUpdated: new Date(),
       });
-      console.log('conv', conversation);
+
+      const conversationJSON = conversation[1][0].toJSON();
+      console.log('conv', conversationJSON);
       console.log('message', message);
 
       const pageUsers = users[socket.user.id].clients;
       for (const p of pageUsers) {
         io.to(p).emit('message', {
           message,
-          lastUpdated: conversation[1][0].lastUpdated,
+          lastUpdated: conversationJSON.lastUpdated,
         });
       }
 
       if (users[data.friendId]) {
         io.to(users[data.friendId].clients).emit('message', {
           message,
-          lastUpdated: conversation[1][0].lastUpdated,
+          lastUpdated: conversationJSON.lastUpdated,
         });
       }
     });
 
     socket.on('readReceiptResponse', async (data) => {
       console.log('message have seen', data);
-      const messages = await updateMessage(data.readReceiptIds, {
+
+      const messageIds = [];
+      for (let i = 0; i < data.readReceiptIds.length; i++) {
+        messageIds.push(data.readReceiptIds[i].messageId);
+      }
+
+      const messages = await updateMessage(messageIds, {
         haveSeen: true,
       });
       console.log('messages', messages);

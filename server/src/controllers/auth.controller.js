@@ -16,10 +16,10 @@ import {
 // import { getMessages } from '../services/message.service';
 import { addRefreshSession } from '../lib/addRefreshSession';
 import { makeAccessToken } from '../lib/makeAccessToken';
-// import { seed } from '../models/seed';
+import { seed } from '../models/seed';
 
 export const loginController = async (req, res) => {
-  // await seed();
+  await seed();
   const { user, fingerprint } = req.body;
   // console.log('user', user);
   const refTokenExpiresInMilliseconds = new Date().getTime() + ms(jwtRtExpires);

@@ -1,15 +1,25 @@
 const syncModels = async (db) => {
-  const { user, refreshSession, conversation, userToConversation, message } =
-    db;
+  const {
+    user,
+    refreshSession,
+    conversation,
+    userToConversation,
+    message,
+    messageByDay,
+  } = db;
 
   try {
     await user.sync();
     await refreshSession.sync();
-    // await User.sync({ force: true });
     await conversation.sync();
     await userToConversation.sync();
-    // await message.sync({ force: true });
-    await message.sync();
+
+    await messageByDay.sync({ force: true });
+    await message.sync({ force: true });
+
+    // await messageByDay.sync();
+    // await message.sync();
+
     console.log(
       `Models ${user.name}, ${refreshSession.name} have been synced.`
     );

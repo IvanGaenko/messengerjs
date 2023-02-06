@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Message = sequelize.define(
+  const MessageByDay = sequelize.define(
     'messageByDay',
     {
       // content: {
@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         // type: DataTypes.DATE,
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,
         defaultValue: Math.floor(+new Date() / 100000),
       },
     },
@@ -23,5 +24,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  return Message;
+  return MessageByDay;
 };

@@ -19,31 +19,57 @@ const time = [
   'February 03, 2023 17:15:50',
 ];
 
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 const getRandomValues = (content) =>
   content[Math.floor(Math.random() * content.length)];
 
-const data = {
-  user: {
-    username: 'userOne',
-    email: 'userone@gmail.com',
-    password: '1234567',
-  },
-  message: {
-    content: 'hello',
-    userId: 1,
-    conversationId: 1,
-    haveSeen: false,
-    timestamp: Math.floor(+new Date() / 1000),
-  },
-};
+export async function seed() {
+  let byDayId = 1;
+  for (let i = 0; i < time.length; i++) {
+    const currentDate = new Date(time[i]);
+    const day =
+      +new Date(
+        `${
+          MONTH_NAMES[currentDate.getMonth()]
+        }-${currentDate.getDate()}-${currentDate.getFullYear()}`
+      ) / 100000;
+    const byDay = await db.messageByDay.findOrCreate({
+      where: { dayId: day },
+      defaults: {
+        dayId: day,
+        conversationId: 1,
+      },
+    });
 
-export async function seed(dbName = 'message', times = 10) {
-  console.log(dbName, times);
-  for (let i = 0; i < times; i++) {
-    await db[dbName].create({
-      ...data[dbName],
+    const parsed = byDay[0].toJSON();
+
+    if (parsed.id !== byDayId) {
+      byDayId = parsed.id;
+    }
+    console.log('byDay', parsed.id, byDayId);
+
+    await db.message.create({
+      userId: 2,
+      conversationId: 1,
+      haveSeen: false,
       content: getRandomValues(content),
-      timestamp: Math.floor(+new Date(time[i]) / 1000),
+      // timestamp: Math.floor(+new Date(time[i]) / 1000),
+      timestamp: String(+new Date(time[i])),
+      byDayId,
     });
   }
 }

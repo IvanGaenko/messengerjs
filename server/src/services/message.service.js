@@ -2,20 +2,42 @@ import { Op } from 'sequelize';
 
 import db from '../models';
 
-export const addMessage = async (payload) =>
-  await db.message.create({
-    ...payload,
+// export const addMessage = async (payload) =>
+//   await db.message.create({
+//     ...payload,
+//   });
+
+export const addMessage = async (payload) => {
+  const { dayId, ...data } = payload;
+  const byDay = await db.messageByDay.findOrCreate({
+    where: { dayId },
+    defaults: {
+      dayId,
+      conversationId: data.conversationId,
+    },
+  });
+  const byDayJSON = byDay[0].toJSON();
+
+  const message = await db.message.create({
+    ...data,
+    byDayId: byDayJSON.id,
   });
 
-export const updateMessage = async (payload, data) =>
+  const messageJSON = message.toJSON();
+
+  return {
+    ...messageJSON,
+    conversationId: byDayJSON.conversationId,
+    dayId,
+  };
+};
+
+export const updateMessage = async (id, data) =>
   await db.message.update(
-    // {
-    //   haveSeen: true,
-    // },
     { ...data },
     {
       where: {
-        id: payload,
+        id,
       },
       returning: true,
     }

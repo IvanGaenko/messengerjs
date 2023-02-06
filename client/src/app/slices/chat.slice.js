@@ -13,7 +13,6 @@ const chatSlice = createSlice({
     setChatList: (state, action) => {
       state.chatList = action.payload;
       state.activeChat = null;
-      console.log('setChatList payload', action.payload);
     },
     setActiveChat: (state, action) => {
       if (action.payload === null) {
@@ -23,64 +22,107 @@ const chatSlice = createSlice({
       state.activeChat = state.chatList.conversations.find(
         (chat) => chat.id === action.payload,
       );
-      console.log('setActiveChat payload', action.payload);
     },
     toggleFriendOnline: (state, action) => {
-      console.log('toggleFriendOnline payload', action.payload);
-      if (
-        state.activeChat !== null &&
-        state.activeChat?.user[0].id === action.payload.id
-      ) {
-        state.activeChat.user[0].isOnline = action.payload.online;
-        if (action.payload.online !== true) {
-          state.activeChat.user[0].lastActivity = action.payload.lastActivity;
+      const { id, online, lastActivity } = action.payload;
+      if (state.activeChat !== null && state.activeChat?.user[0].id === id) {
+        state.activeChat.user[0].isOnline = online;
+        if (online !== true) {
+          state.activeChat.user[0].lastActivity = lastActivity;
         }
       }
-      console.log(
-        'chat list before toggle online iteration',
-        state.chatList.conversations,
-      );
+
       for (let i = 0; i < state.chatList.conversations.length; i++) {
         const chat = state.chatList.conversations[i];
-        if (chat.user[0].id === action.payload.id) {
-          console.log('finded chat for online status', chat.user[0].isOnline);
-          chat.user[0].isOnline = action.payload.online;
-          chat.user[0].lastActivity = action.payload.lastActivity;
+        if (chat.user[0].id === id) {
+          chat.user[0].isOnline = online;
+          chat.user[0].lastActivity = lastActivity;
+
           return;
         }
       }
     },
     updateFriendData: (state, action) => {
-      if (
-        state.activeChat !== null &&
-        state.activeChat?.user[0].id === action.payload.id
-      ) {
-        state.activeChat.user[0].username =
-          action.payload.username ?? state.activeChat.user[0].username;
-        state.activeChat.user[0].email =
-          action.payload.email ?? state.activeChat.user[0].email;
+      const { id } = action.payload;
+      if (state.activeChat !== null && state.activeChat?.user[0].id === id) {
+        state.activeChat.user[0] = {
+          ...state.activeChat.user[0],
+          ...action.payload,
+        };
       }
 
       for (let i = 0; i < state.chatList.conversations.length; i++) {
         const chat = state.chatList.conversations[i];
-        if (chat.user[0].id === action.payload.id) {
-          chat.user[0].username =
-            action.payload.username ?? chat.user[0].username;
-          chat.user[0].email = action.payload.email ?? chat.user[0].email;
+        if (chat.user[0].id === id) {
+          chat.user[0] = {
+            ...chat.user[0],
+            ...action.payload,
+          };
+
           return;
         }
       }
     },
     addMessage: (state, action) => {
       console.log('action.payload message', action.payload);
+      const { lastUpdated, message } = action.payload;
+      const { conversationId, dayId, ...messageData } = message;
+
+      const currentConversationIndex = state.chatList.conversations.findIndex(
+        (conversation) => {
+          return conversation.id === conversationId;
+        },
+      );
+
+      const currentMessageByDayIndex = state.chatList.conversations[
+        currentConversationIndex
+      ].messageByDay.findIndex((byDay) => {
+        return byDay.dayId === dayId;
+      });
+
+      console.log('currentConversationIndex', currentConversationIndex);
+      console.log('currentMessageByDayIndex', currentMessageByDayIndex);
+
+      if (currentMessageByDayIndex === -1) {
+        state.chatList.conversations[
+          currentConversationIndex
+        ].messageByDay.push({
+          id: messageData.byDayId,
+          dayId,
+          conversationId,
+          messages: [],
+        });
+
+        if (
+          state.activeChat !== null &&
+          conversationId === state.activeChat?.id
+        ) {
+          state.activeChat.messageByDay.push({
+            id: messageData.byDayId,
+            dayId,
+            conversationId,
+            messages: [],
+          });
+
+          console.log('added messageByDay');
+        }
+      }
+
       if (
         state.activeChat !== null &&
-        action.payload.message.conversationId === state.activeChat?.id
+        conversationId === state.activeChat?.id
       ) {
         state.activeChat.isTyping = false;
-        state.activeChat.messages.push(action.payload.message);
 
-        if (action.payload.message.userId !== state.chatList.id) {
+        state.activeChat.messageByDay[
+          currentMessageByDayIndex === -1
+            ? state.activeChat.messageByDay.length - 1
+            : currentMessageByDayIndex
+        ].messages.push({
+          ...messageData,
+        });
+
+        if (messageData.userId !== state.chatList.id) {
           state.activeChat.unreadedMessagesCount++;
           console.log(
             '+++++++++++++++++++++++++++ unreadedMessagesCount activeChat added',
@@ -89,67 +131,92 @@ const chatSlice = createSlice({
         }
       }
 
-      for (let i = 0; i < state.chatList.conversations.length; i++) {
-        const chat = state.chatList.conversations[i];
-        if (chat.id === action.payload.message.conversationId) {
-          chat.isTyping = false;
-          chat.messages.push(action.payload.message);
-          chat.lastUpdated = action.payload.lastUpdated;
+      state.chatList.conversations[currentConversationIndex].isTyping = false;
+      state.chatList.conversations[currentConversationIndex].lastUpdated =
+        lastUpdated;
+      state.chatList.conversations[currentConversationIndex].messageByDay[
+        currentMessageByDayIndex === -1
+          ? state.chatList.conversations[currentConversationIndex].messageByDay
+              .length - 1
+          : currentMessageByDayIndex
+      ].messages.push({
+        ...messageData,
+      });
 
-          if (action.payload.message.userId !== state.chatList.id) {
-            chat.unreadedMessagesCount++;
-            console.log(
-              '+++++++++++++++++++++++++++unreadedMessagesCount chatList added',
-              chat.unreadedMessagesCount,
-            );
-          }
+      state.chatList.conversations.sort((a, b) => {
+        return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+      });
 
-          state.chatList.conversations.sort((a, b) => {
-            return new Date(b.lastUpdated) - new Date(a.lastUpdated);
-          });
-          return;
-        }
+      if (messageData.userId !== state.chatList.id) {
+        state.chatList.conversations[currentConversationIndex]
+          .unreadedMessagesCount++;
+        console.log(
+          '+++++++++++++++++++++++++++ unreadedMessagesCount activeChat added',
+          state.chatList.conversations[currentConversationIndex]
+            .unreadedMessagesCount,
+        );
       }
     },
     typingStatus: (state, action) => {
       console.log('typingStatus', action.payload);
-      if (
-        state.activeChat !== null &&
-        state.activeChat.id === action.payload.conversationId
-      ) {
-        state.activeChat.isTyping = action.payload.isTyping;
+      const { conversationId, isTyping } = action.payload;
+      if (state.activeChat !== null && state.activeChat.id === conversationId) {
+        state.activeChat.isTyping = isTyping;
       }
 
       for (let i = 0; i < state.chatList.conversations.length; i++) {
         const chat = state.chatList.conversations[i];
-        if (chat.id === action.payload.conversationId) {
-          chat.isTyping = action.payload.isTyping;
+        if (chat.id === conversationId) {
+          chat.isTyping = isTyping;
           return;
         }
       }
     },
     updateReceiptStatus: (state, action) => {
       console.log('updateReceiptStatus', action.payload);
-      const { readReceiptIds, conversationId } = action.payload;
+      const { readReceiptIds, conversationId, friendId } = action.payload;
+
       const currentConversationIndex = state.chatList.conversations.findIndex(
-        (conversation) => conversation.id === conversationId,
+        (conversation) => {
+          return conversation.id === conversationId;
+        },
       );
       console.log('readReceiptIds', readReceiptIds);
 
       for (let i = 0; i < readReceiptIds.length; i++) {
-        const findedMessageIndex = state.chatList.conversations[
-          currentConversationIndex
-        ].messages.findIndex((message) => message.id === readReceiptIds[i]);
+        const { dayId, messageId } = readReceiptIds[i];
 
-        if (findedMessageIndex !== -1) {
+        const findedDayIndex = state.chatList.conversations[
+          currentConversationIndex
+        ].messageByDay.findIndex((byDay) => {
+          return byDay.dayId === dayId;
+        });
+
+        console.log(
+          'findedDayIndex',
+          state.chatList.conversations[currentConversationIndex].messageByDay[
+            findedDayIndex
+          ].messages,
+        );
+        if (findedDayIndex !== -1) {
+          const findedMessageIndex = state.chatList.conversations[
+            currentConversationIndex
+          ].messageByDay[findedDayIndex].messages.findIndex((message) => {
+            return message.id === messageId;
+          });
+
+          console.log('findedMessageIndex', findedMessageIndex);
+
           // for active chat
           if (
             state.activeChat !== null &&
             state.activeChat?.id === conversationId
           ) {
-            state.activeChat.messages[findedMessageIndex].haveSeen = true;
+            state.activeChat.messageByDay[findedDayIndex].messages[
+              findedMessageIndex
+            ].haveSeen = true;
 
-            if (action.payload.friendId !== state.chatList.id) {
+            if (friendId !== state.chatList.id) {
               state.activeChat.unreadedMessagesCount--;
               console.log(
                 '------------------------------unreadedMessagesCount activeChat removed',
@@ -158,11 +225,11 @@ const chatSlice = createSlice({
             }
           }
 
-          state.chatList.conversations[currentConversationIndex].messages[
-            findedMessageIndex
-          ].haveSeen = true;
+          state.chatList.conversations[currentConversationIndex].messageByDay[
+            findedDayIndex
+          ].messages[findedMessageIndex].haveSeen = true;
 
-          if (action.payload.friendId !== state.chatList.id) {
+          if (friendId !== state.chatList.id) {
             state.chatList.conversations[currentConversationIndex]
               .unreadedMessagesCount--;
             console.log(

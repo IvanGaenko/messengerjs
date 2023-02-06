@@ -13,9 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       timestamp: {
         // type: DataTypes.DATE,
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: Math.floor(+new Date() / 1000),
+        defaultValue: String(+new Date()),
       },
     },
     {

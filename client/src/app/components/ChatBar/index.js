@@ -3,18 +3,16 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import EditUserProfile from './EditUserProfile';
 import Settings from './Settings';
+import MainMenu from '../popups/MainMenu';
+import AddContactButton from '../buttons/AddContactButton';
 import {
   addMessage,
   typingStatus,
   updateReceiptStatus,
 } from '../../slices/chat.slice';
-import { setAddUserModal } from '../../slices/handler.slice';
 
 import { MdClose } from 'react-icons/md';
-import { HiPencil } from 'react-icons/hi';
-import { MdOutlineDarkMode } from 'react-icons/md';
 import { BiCheck, BiCheckDouble, BiSearch } from 'react-icons/bi';
-import { IoSettingsOutline } from 'react-icons/io5';
 import UserIcon from '../../common/UserIcon';
 
 import { socket } from '../../socket';
@@ -34,7 +32,6 @@ const ChatBar = ({ conversations, handleClick }) => {
   const [toggleLogoutMenu, setToggleLogoutMenu] = useState(false);
   const [toggleSettings, setToggleSettings] = useState(false);
   const [toggleEditProfile, setToggleEditProfile] = useState(false);
-  const [toggleDarkMode, setToggleDarkMode] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -181,75 +178,10 @@ const ChatBar = ({ conversations, handleClick }) => {
                   } hover:bg-[hsla(0,0%,67%,.08)]`}
                 >
                   {toggleMainMenu && (
-                    <>
-                      <div className="!w-auto !fixed !max-w-none -bottom-full cursor-default -left-full -right-full -top-full select-none z-[4]"></div>
-                      <div
-                        ref={mainMenuRef}
-                        className="max-h-[calc(4.32px*100 - 3.75rem)] min-w-[260px] transition-none overlay-y-[overlay] mt-2 pb-0 left-0 right-auto top-full origin-top-left transform !scale-x-100 opacity-100 visible shadow-[0_0_10px_rgba(0_0_0_0.15)] backdrop-filter backdrop-blur-[50px] bg-[rgba(33,33,33,0.75)] rounded-[10px] text-[1rem] py-[0.3125rem] px-0 absolute z-[4] select-none"
-                      >
-                        <div
-                          className="!cursor-pointer !pointer-events-auto flex items-center rounded-[0.3125rem] text-white text-[14px] font-medium h-8 leading-[18px] mx-[0.3125rem] py-1 pl-3 relative transform scale-100 whitespace-nowrap text-left pr-[0.375rem] hover:bg-[rgba(171,171,171,0.08)]"
-                          onClick={() => setToggleSettings((prev) => !prev)}
-                        >
-                          <IoSettingsOutline
-                            style={{
-                              marginRight: '1.25rem',
-                              position: 'relative',
-                              alignSelf: 'flex-start',
-                              color: 'white',
-                              fontSize: '1.25rem',
-                              marginTop: '0.125rem',
-                            }}
-                          />
-                          <span className="pointer-events-none flex-auto relative">
-                            Settings
-                          </span>
-                        </div>
-                        <div
-                          className="!cursor-pointer !pointer-events-auto flex items-center rounded-[0.3125rem] text-white text-[14px] font-medium h-8 leading-[18px] mx-[0.3125rem] py-1 pl-3 relative transform scale-100 whitespace-nowrap text-left pr-[0.375rem] hover:bg-[rgba(171,171,171,0.08)]"
-                          onClick={() => setToggleDarkMode((prev) => !prev)}
-                        >
-                          <MdOutlineDarkMode
-                            style={{
-                              marginRight: '1.25rem',
-                              position: 'relative',
-                              alignSelf: 'flex-start',
-                              color: 'white',
-                              fontSize: '1.25rem',
-                              marginTop: '0.125rem',
-                            }}
-                          />
-                          <span className="pointer-events-none flex-auto relative">
-                            Dark Mode
-                          </span>
-                          <label className="cursor-pointer min-h-[20px] min-w-[20px] relative pointer-events-none flex items-center my-0 mx-[0.3125rem] p-0 text-left">
-                            <input
-                              type="checkbox"
-                              checked={toggleDarkMode}
-                              onChange={() =>
-                                setToggleDarkMode((prev) => !prev)
-                              }
-                              className="box-border opacity-0 p-0 absolute z-[-1] bg-transparent caret-[#8774e1] text-white overflow-visible leading-[1.15] m-0 text-[100%]"
-                            />
-                            <div
-                              className={`flex relative items-center  rounded-xl h-[0.875rem] my-0 mx-[3px] w-[1.9375rem] before:bg-[#212121] before:border-[2px] before:rounded-[50%] before:content-[' '] before:h-[1.25rem] before:absolute before:transform before:w-[1.25rem] ${
-                                toggleDarkMode
-                                  ? 'bg-[#8774e1] before:border-[#8774e1] before:translate-x-[calc((1.9375rem-1.25rem)+3px)]'
-                                  : 'bg-[#707579] before:translate-x-[calc(3px*-1)] before:border-[#707579]'
-                              }`}
-                            ></div>
-                          </label>
-                        </div>
-                        <a
-                          className="flex items-center rounded-bl-[10px] rounded-br-[10px] text-current text-[0.875rem] h-10 justify-center"
-                          href="https://github.com/IvanGaenko/messengerjs"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>My messenger 1.1.0</span>
-                        </a>
-                      </div>
-                    </>
+                    <MainMenu
+                      mainMenuRef={mainMenuRef}
+                      setToggleSettings={setToggleSettings}
+                    />
                   )}
                 </button>
                 <div
@@ -436,8 +368,16 @@ const ChatBar = ({ conversations, handleClick }) => {
                                         >
                                           {chat.isTyping ? (
                                             'typing'
-                                          ) : chat.messages.length > 0 ? (
-                                            <>{chat.messages.at(-1).content}</>
+                                          ) : chat.messageByDay.length > 0 &&
+                                            chat.messageByDay.at(-1).messages
+                                              .length > 0 ? (
+                                            <>
+                                              {
+                                                chat.messageByDay
+                                                  .at(-1)
+                                                  .messages?.at(-1).content
+                                              }
+                                            </>
                                           ) : (
                                             'No messages'
                                           )}
@@ -468,11 +408,17 @@ const ChatBar = ({ conversations, handleClick }) => {
                                                 : 'text-[#8774e1]'
                                             } inline-block text-[1.25rem] h-[1.25rem] leading-[1] mt-[-0.0625rem] relative align-middle w-[1.25rem] overflow-hidden overflow-ellipsis whitespace-nowrap`}
                                           >
-                                            {chat.messages.length > 0 &&
+                                            {chat.messageByDay.length > 0 &&
+                                              chat.messageByDay.at(-1).messages
+                                                .length > 0 &&
                                               id ===
-                                                chat.messages.at(-1).userId && (
+                                                chat.messageByDay
+                                                  .at(-1)
+                                                  .messages?.at(-1).userId && (
                                                 <>
-                                                  {chat.messages.at(-1)
+                                                  {chat.messageByDay
+                                                    .at(-1)
+                                                    .messages?.at(-1)
                                                     .haveSeen === false ? (
                                                     <BiCheck
                                                       style={{
@@ -557,25 +503,7 @@ const ChatBar = ({ conversations, handleClick }) => {
                 </div>
               )}
               {/* Add Contact Button */}
-              {!isOpenAddUserModal && (
-                <button
-                  className="!transition-none right-5 rounded-[50%] h-[54px] leading-[54px] w-[54px] !cursor-pointer !font-normal overflow-visible flex justify-center items-center outline-none text-center z-[3] bg-[#8774e1] border-none bottom-5 text-white !shadow-none !p-0 m-0 !absolute hover:bg-[#6a52da]"
-                  style={{
-                    transform: 'translateZ(0)',
-                    fontSize: '1.5rem',
-                  }}
-                  onClick={() => dispatch(setAddUserModal(!isOpenAddUserModal))}
-                >
-                  <HiPencil
-                    style={{
-                      visibility: 'visible !important',
-                      height: '24px',
-                      lineHeight: '24px',
-                      position: 'absolute',
-                    }}
-                  />
-                </button>
-              )}
+              {!isOpenAddUserModal && <AddContactButton />}
             </div>
           </div>
         )}

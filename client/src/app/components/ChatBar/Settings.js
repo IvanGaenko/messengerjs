@@ -1,10 +1,9 @@
 import { useSelector } from 'react-redux';
 
-import AuthService from '../../services/auth.service';
-import { socket } from '../../socket';
+import LogoutMenu from '../popups/LogoutMenu';
 import { timeAgo } from '../../features/getFormattedDate';
 
-import { HiPencil, HiOutlineLogout } from 'react-icons/hi';
+import { HiPencil } from 'react-icons/hi';
 import { MdAlternateEmail } from 'react-icons/md';
 import { BiArrowBack } from 'react-icons/bi';
 import { BsThreeDotsVertical } from 'react-icons/bs';
@@ -19,11 +18,6 @@ const Settings = ({
 }) => {
   const { username, email } = useSelector((state) => state.user);
   const { chatList } = useSelector((state) => state.chat);
-
-  const onLogout = () => {
-    socket.emit('logout', '');
-    AuthService.makeLogout();
-  };
 
   return (
     <div className="!transition-none flex bg-[#181818] flex-col col-start-1 row-start-1 overflow-hidden">
@@ -50,34 +44,7 @@ const Settings = ({
           onClick={() => setToggleLogoutMenu((prev) => !prev)}
         >
           <BsThreeDotsVertical />
-          {toggleLogoutMenu && (
-            <>
-              <div className="!max-w-none !fixed !w-auto -bottom-full cursor-default -left-full -right-full -top-full select-none z-[4]"></div>
-              <div
-                ref={logoutMenuRef}
-                className="transition-none overflow-y-[overlay] mt-2 left-auto right-0 top-full origin-top-right transform !scale-x-100 shadow-[0_0_10px_rgba(0_0_0_0.15)] backdrop-blur-[50px] bg-[rgba(33,33,33,0.75)] rounded-[10px] text-[1rem] min-w-[11.25rem] py-[0.3125rem] px-0 absolute select-none z-[4]"
-              >
-                <div
-                  className="text-left flex items-center rounded-[0.3125rem] text-white text-[14px] font-medium h-8 leading-[18px] mx-[0.3125rem] py-1 px-3 relative transform scale-100 whitespace-nowrap !cursor-pointer !pointer-events-auto hover:bg-[rgba(171,171,171,0.08)]"
-                  onClick={onLogout}
-                >
-                  <HiOutlineLogout
-                    style={{
-                      marginRight: '1.25rem',
-                      position: 'relative',
-                      alignSelf: 'flex-start',
-                      color: 'white',
-                      fontSize: '1.25rem',
-                      marginTop: '0.125rem',
-                    }}
-                  />
-                  <span className="pointer-events-none flex-auto relative">
-                    Log Out
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
+          {toggleLogoutMenu && <LogoutMenu logoutMenuRef={logoutMenuRef} />}
         </button>
       </div>
       <div className="flex flex-auto h-full max-h-full overflow-hidden relative w-full">

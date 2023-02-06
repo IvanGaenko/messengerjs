@@ -24,12 +24,18 @@ const ChatBodyInput = () => {
   }, [inputValue]);
 
   const onSendMessage = () => {
+    const timestamp = String(+new Date());
+    const dayId = Math.floor(+new Date().setHours(0, 0, 0, 0) / 100000);
+    // const currentDate = new Date();
+
     socket.emit('clientResponse', {
       userId: id,
       friendId,
       conversationId,
       content: inputValue,
       haveSeen: false,
+      dayId,
+      timestamp,
     });
     setInputValue(initialValue);
     inputRef.current.textContent = initialValue;

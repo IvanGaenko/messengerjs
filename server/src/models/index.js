@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
   config.database,
   config.username,
   config.password,
-  config,
+  config
 );
 
 const db = {};
@@ -20,6 +20,7 @@ const modelDefiners = [
   require('./Conversation.model'),
   require('./Message.model'),
   require('./UserToConversation.model'),
+  require('./MessageByDay.model'),
 ];
 
 for (const modelDefiner of modelDefiners) {

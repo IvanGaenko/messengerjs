@@ -1,6 +1,13 @@
 function addAssociations(db) {
-  const { user, refreshSession, conversation, userToConversation, message } =
-    db;
+  const {
+    user,
+    refreshSession,
+    conversation,
+    userToConversation,
+    message,
+    messageByDay,
+  } = db;
+
   // user - refreshSession
   user.hasMany(refreshSession, { as: 'refreshSessions', foreignKey: 'userId' });
   refreshSession.belongsTo(user, {
@@ -26,33 +33,46 @@ function addAssociations(db) {
     as: 'user',
   });
 
-  // conversation - messages
-  conversation.hasMany(message, {
+  conversation.hasMany(messageByDay, {
     foreignKey: 'conversationId',
-    as: 'messages',
+    as: 'messageByDay',
   });
 
-  conversation.hasMany(message, {
-    foreignKey: 'conversationId',
-    as: 'unreadedMessages',
-  });
-
-  message.belongsTo(conversation, {
+  messageByDay.belongsTo(conversation, {
     foreignKey: 'conversationId',
     as: 'conversations',
   });
+
+  messageByDay.hasMany(message, {
+    foreignKey: 'byDayId',
+    as: 'messages',
+  });
+
+  messageByDay.hasMany(message, {
+    foreignKey: 'byDayId',
+    as: 'unreadedMessages',
+  });
+
+  message.belongsTo(messageByDay, {
+    foreignKey: 'byDayId',
+    as: 'messageByDay',
+  });
+
+  // conversation - messages
+  // conversation.hasMany(message, {
+  //   foreignKey: 'conversationId',
+  //   as: 'messages',
+  // });
+
+  // conversation.hasMany(message, {
+  //   foreignKey: 'conversationId',
+  //   as: 'unreadedMessages',
+  // });
+
+  // message.belongsTo(conversation, {
+  //   foreignKey: 'conversationId',
+  //   as: 'conversations',
+  // });
 }
 
 module.exports = { addAssociations };
-
-// user.hasMany(userToConversation);
-// userToConversation.belongsTo(user);
-
-// conversation.hasMany(userToConversation);
-// userToConversation.belongsTo(conversation);
-
-// conversation.hasMany(message);
-// message.belongsTo(conversation);
-
-// user.hasMany(message);
-// message.belongsTo(user);
